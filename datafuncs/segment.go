@@ -70,8 +70,16 @@ func LinearSegmentDataIterator(options LinearSegmentDataIteratorOptions) (series
 		// Have we reached the end?
 		if options.LengthIterationCount != 0 && currentIterationCount >= options.LengthIterationCount {
 			return series.ScrapeResult{Value: 0, Missing: false, Exhausted: true}
-		} else if options.LengthDuration != 0 && currentElapsedTime >= options.LengthDuration {
-			return series.ScrapeResult{Value: 0, Missing: false, Exhausted: true}
+		} else if options.LengthDuration != 0 {
+			if options.LengthDurationExclusive {
+				if currentElapsedTime >= options.LengthDuration {
+					return series.ScrapeResult{Value: 0, Missing: false, Exhausted: true}
+				}
+			} else {
+				if currentElapsedTime > options.LengthDuration {
+					return series.ScrapeResult{Value: 0, Missing: false, Exhausted: true}
+				}
+			}
 		}
 
 		// If this is the first scrape, return the AmplitudeStart
@@ -93,8 +101,9 @@ func LinearSegmentDataIterator(options LinearSegmentDataIteratorOptions) (series
 			value := options.AmplitudeStart + slope*float64(currentElapsedTime)
 			return series.ScrapeResult{Value: value, Missing: false, Exhausted: false}
 		} else {
-			// This should never happen as we double check in the validation phase
-			return series.ScrapeResult{Value: 0, Missing: false, Exhausted: false}
+			// This should never happen as we double check in the validation phase, but in any case we set the sample
+			// as missing.
+			return series.ScrapeResult{Value: 0, Missing: true, Exhausted: false}
 		}
 	}, nil
 }
