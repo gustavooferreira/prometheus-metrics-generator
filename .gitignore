@@ -21,5 +21,8 @@
 go.work
 
 # IDE folders
-.idea/
-.vscode/
+.idea
+.vscode
+
+# bin folder
+bin/
