@@ -1,21 +1,17 @@
 package datafuncs_test
 
 import (
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gustavooferreira/prometheus-metrics-generator/datafuncs"
 	"gustavooferreira/prometheus-metrics-generator/series"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-func TestLinearSegmentDataIterator(t *testing.T) {
+func TestVoidDataIterator(t *testing.T) {
 	t.Run("should fail given that neither the LengthDuration nor LengthIterationCount were set", func(t *testing.T) {
-		_, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart: 11,
-			AmplitudeEnd:   20,
-		})
+		_, err := datafuncs.VoidDataIterator(datafuncs.VoidDataIteratorOptions{})
 		require.Error(t, err)
 		expectedErrorMessage := "stop condition needs to be provided, either set the length duration or length " +
 			"iteration count"
@@ -23,9 +19,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 	})
 
 	t.Run("should fail given that both the LengthDuration and LengthIterationCount options were set", func(t *testing.T) {
-		_, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart:       11,
-			AmplitudeEnd:         20,
+		_, err := datafuncs.VoidDataIterator(datafuncs.VoidDataIteratorOptions{
 			LengthDuration:       time.Second,
 			LengthIterationCount: 10,
 		})
@@ -35,9 +29,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 	})
 
 	t.Run("should fail given that LengthDuration is negative", func(t *testing.T) {
-		_, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart: 11,
-			AmplitudeEnd:   20,
+		_, err := datafuncs.VoidDataIterator(datafuncs.VoidDataIteratorOptions{
 			LengthDuration: -1 * time.Second,
 		})
 		require.Error(t, err)
@@ -46,9 +38,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 	})
 
 	t.Run("should fail given that LengthIterationCount is negative", func(t *testing.T) {
-		_, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart:       11,
-			AmplitudeEnd:         20,
+		_, err := datafuncs.VoidDataIterator(datafuncs.VoidDataIteratorOptions{
 			LengthIterationCount: -10,
 		})
 		require.Error(t, err)
@@ -57,9 +47,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 	})
 
 	t.Run("should fail given that LengthDurationExclusive was set without setting LengthDuration", func(t *testing.T) {
-		_, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart:          11,
-			AmplitudeEnd:            20,
+		_, err := datafuncs.VoidDataIterator(datafuncs.VoidDataIteratorOptions{
 			LengthIterationCount:    10,
 			LengthDurationExclusive: true,
 		})
@@ -69,7 +57,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		assert.Equal(t, expectedErrorMessage, err.Error())
 	})
 
-	t.Run("should produce valid values for given iteration count", func(t *testing.T) {
+	t.Run("should produce valid result for given iteration count", func(t *testing.T) {
 		scraper, err := series.NewScraper(
 			series.ScraperConfig{
 				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
@@ -79,10 +67,8 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		lsDataIterator, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart:       11,
-			AmplitudeEnd:         20,
-			LengthIterationCount: 10,
+		lsDataIterator, err := datafuncs.VoidDataIterator(datafuncs.VoidDataIteratorOptions{
+			LengthIterationCount: 5,
 		})
 		require.NoError(t, err)
 
@@ -104,19 +90,19 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, r := range results {
-			t.Logf("[%3d] Timestamp: %s - Value: %.2f\n",
+			t.Logf("[%3d] Timestamp: %s - Missing: %t\n",
 				r.scrapeInfo.IterationCount,
 				r.scrapeInfo.IterationTime,
-				r.scrapeResult.Value,
+				r.scrapeResult.Missing,
 			)
 		}
 
-		require.Equal(t, 10, len(results))
-		assert.InDelta(t, 11, results[0].scrapeResult.Value, 0.001)
-		assert.InDelta(t, 20, results[9].scrapeResult.Value, 0.001)
+		require.Equal(t, 5, len(results))
+		assert.True(t, results[0].scrapeResult.Missing)
+		assert.True(t, results[4].scrapeResult.Missing)
 	})
 
-	t.Run("should produce valid values for given length duration", func(t *testing.T) {
+	t.Run("should produce valid results for given length duration", func(t *testing.T) {
 		scraper, err := series.NewScraper(
 			series.ScraperConfig{
 				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
@@ -126,9 +112,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		lsDataIterator, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart: 11,
-			AmplitudeEnd:   20,
+		lsDataIterator, err := datafuncs.VoidDataIterator(datafuncs.VoidDataIteratorOptions{
 			LengthDuration: time.Minute,
 		})
 		require.NoError(t, err)
@@ -151,19 +135,19 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, r := range results {
-			t.Logf("[%3d] Timestamp: %s - Value: %.2f\n",
+			t.Logf("[%3d] Timestamp: %s - Missing: %t\n",
 				r.scrapeInfo.IterationCount,
 				r.scrapeInfo.IterationTime,
-				r.scrapeResult.Value,
+				r.scrapeResult.Missing,
 			)
 		}
 
 		require.Equal(t, 5, len(results))
-		assert.InDelta(t, 11, results[0].scrapeResult.Value, 0.001)
-		assert.InDelta(t, 20, results[4].scrapeResult.Value, 0.001)
+		assert.True(t, results[0].scrapeResult.Missing)
+		assert.True(t, results[4].scrapeResult.Missing)
 	})
 
-	t.Run("should produce valid values for given length duration with exclusive option set", func(t *testing.T) {
+	t.Run("should produce valid results for given length duration with exclusive option set", func(t *testing.T) {
 		scraper, err := series.NewScraper(
 			series.ScraperConfig{
 				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
@@ -173,9 +157,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		lsDataIterator, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart:          11,
-			AmplitudeEnd:            20,
+		lsDataIterator, err := datafuncs.VoidDataIterator(datafuncs.VoidDataIteratorOptions{
 			LengthDuration:          time.Minute,
 			LengthDurationExclusive: true,
 		})
@@ -199,19 +181,19 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, r := range results {
-			t.Logf("[%3d] Timestamp: %s - Value: %.2f\n",
+			t.Logf("[%3d] Timestamp: %s - Missing: %t\n",
 				r.scrapeInfo.IterationCount,
 				r.scrapeInfo.IterationTime,
-				r.scrapeResult.Value,
+				r.scrapeResult.Missing,
 			)
 		}
 
 		require.Equal(t, 4, len(results))
-		assert.InDelta(t, 11, results[0].scrapeResult.Value, 0.001)
-		assert.InDelta(t, 17.75, results[3].scrapeResult.Value, 0.001)
+		assert.True(t, results[0].scrapeResult.Missing)
+		assert.True(t, results[3].scrapeResult.Missing)
 	})
 
-	t.Run("should produce valid values for a horizontal line", func(t *testing.T) {
+	t.Run("should produce valid results even though data is shifted in time", func(t *testing.T) {
 		scraper, err := series.NewScraper(
 			series.ScraperConfig{
 				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
@@ -221,56 +203,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		lsDataIterator, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart: 50,
-			AmplitudeEnd:   50,
-			LengthDuration: 2 * time.Minute,
-		})
-		require.NoError(t, err)
-
-		type resultContainer struct {
-			scrapeInfo   series.ScrapeInfo
-			scrapeResult series.ScrapeResult
-		}
-
-		var results []resultContainer
-		scrapeHandler := func(scrapeInfo series.ScrapeInfo, scrapeResult series.ScrapeResult) error {
-			results = append(results, resultContainer{
-				scrapeInfo:   scrapeInfo,
-				scrapeResult: scrapeResult,
-			})
-			return nil
-		}
-
-		err = scraper.Scrape(lsDataIterator, scrapeHandler)
-		require.NoError(t, err)
-
-		for _, r := range results {
-			t.Logf("[%3d] Timestamp: %s - Value: %.2f\n",
-				r.scrapeInfo.IterationCount,
-				r.scrapeInfo.IterationTime,
-				r.scrapeResult.Value,
-			)
-		}
-
-		require.Equal(t, 9, len(results))
-		assert.InDelta(t, 50, results[0].scrapeResult.Value, 0.001)
-		assert.InDelta(t, 50, results[8].scrapeResult.Value, 0.001)
-	})
-
-	t.Run("should produce valid values even though data is shifted in time", func(t *testing.T) {
-		scraper, err := series.NewScraper(
-			series.ScraperConfig{
-				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
-				ScrapeInterval: 15 * time.Second,
-			},
-			series.WithScraperIterationCountLimit(100), // It's good practice to set an upper bound in tests
-		)
-		require.NoError(t, err)
-
-		lsDataIterator, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart: 20,
-			AmplitudeEnd:   40,
+		lsDataIterator, err := datafuncs.VoidDataIterator(datafuncs.VoidDataIteratorOptions{
 			LengthDuration: time.Minute,
 		})
 		require.NoError(t, err)
@@ -291,7 +224,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 
 		// ----------------------------
 
-		skipNTimes := 25
+		skipNTimes := 30
 		skipCount := 0
 		for iter := scraper.Iterator(); iter.HasNext(); {
 			scrapeInfo := iter.Next()
@@ -312,26 +245,26 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		}
 
 		for _, r := range results {
-			t.Logf("[%3d] Timestamp: %s - Value: %.2f\n",
+			t.Logf("[%3d] Timestamp: %s - Missing: %t\n",
 				r.scrapeInfo.IterationCount,
 				r.scrapeInfo.IterationTime,
-				r.scrapeResult.Value,
+				r.scrapeResult.Missing,
 			)
 		}
 
 		require.Equal(t, 5, len(results))
-		assert.Equal(t, 25, results[0].scrapeInfo.IterationCount)
+		assert.Equal(t, 30, results[0].scrapeInfo.IterationCount)
 		assert.Equal(t,
-			time.Date(2023, 1, 1, 10, 36, 15, 0, time.UTC),
+			time.Date(2023, 1, 1, 10, 37, 30, 0, time.UTC),
 			results[0].scrapeInfo.IterationTime,
 		)
-		assert.InDelta(t, 20, results[0].scrapeResult.Value, 0.001)
+		assert.True(t, results[0].scrapeResult.Missing)
 
-		assert.Equal(t, 29, results[4].scrapeInfo.IterationCount)
+		assert.Equal(t, 34, results[4].scrapeInfo.IterationCount)
 		assert.Equal(t,
-			time.Date(2023, 1, 1, 10, 37, 15, 0, time.UTC),
+			time.Date(2023, 1, 1, 10, 38, 30, 0, time.UTC),
 			results[4].scrapeInfo.IterationTime,
 		)
-		assert.InDelta(t, 40, results[4].scrapeResult.Value, 0.001)
+		assert.True(t, results[4].scrapeResult.Missing)
 	})
 }
