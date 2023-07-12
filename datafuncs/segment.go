@@ -70,41 +70,41 @@ func LinearSegmentDataIterator(options LinearSegmentDataIteratorOptions) (series
 
 		// Have we reached the end?
 		if options.LengthIterationCount != 0 && currentIterationCount >= options.LengthIterationCount {
-			return series.ScrapeResult{Value: 0, Missing: false, Exhausted: true}
+			return series.ScrapeResult{Exhausted: true}
 		} else if options.LengthDuration != 0 {
 			if options.LengthDurationExclusive {
 				if currentElapsedTime >= options.LengthDuration {
-					return series.ScrapeResult{Value: 0, Missing: false, Exhausted: true}
+					return series.ScrapeResult{Exhausted: true}
 				}
 			} else {
 				if currentElapsedTime > options.LengthDuration {
-					return series.ScrapeResult{Value: 0, Missing: false, Exhausted: true}
+					return series.ScrapeResult{Exhausted: true}
 				}
 			}
 		}
 
 		// If this is the first scrape, return the AmplitudeStart
 		if firstScrapeInProgress {
-			return series.ScrapeResult{Value: options.AmplitudeStart, Missing: false, Exhausted: false}
+			return series.ScrapeResult{Value: options.AmplitudeStart}
 		}
 
 		// If we have a horizontal line, there is no need to do any computation
 		if options.AmplitudeStart == options.AmplitudeEnd {
-			return series.ScrapeResult{Value: options.AmplitudeStart, Missing: false, Exhausted: false}
+			return series.ScrapeResult{Value: options.AmplitudeStart}
 		}
 
 		if options.LengthIterationCount != 0 { // perform calculations based on iteration count
 			slope := (options.AmplitudeEnd - options.AmplitudeStart + 1) / (float64(options.LengthIterationCount))
 			value := options.AmplitudeStart + slope*float64(currentIterationCount)
-			return series.ScrapeResult{Value: value, Missing: false, Exhausted: false}
+			return series.ScrapeResult{Value: value}
 		} else if options.LengthDuration != 0 { // perform calculations based on elapsed time
 			slope := (options.AmplitudeEnd - options.AmplitudeStart) / (float64(options.LengthDuration))
 			value := options.AmplitudeStart + slope*float64(currentElapsedTime)
-			return series.ScrapeResult{Value: value, Missing: false, Exhausted: false}
+			return series.ScrapeResult{Value: value}
 		} else {
 			// This should never happen as we double check in the validation phase, but in any case we set the sample
 			// as missing.
-			return series.ScrapeResult{Value: 0, Missing: true, Exhausted: false}
+			return series.ScrapeResult{Missing: true}
 		}
 	}, nil
 }
