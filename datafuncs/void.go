@@ -57,20 +57,20 @@ func VoidDataIterator(options VoidDataIteratorOptions) (series.DataIterator, err
 
 		// Have we reached the end?
 		if options.LengthIterationCount != 0 && currentIterationCount >= options.LengthIterationCount {
-			return series.ScrapeResult{Value: 0, Missing: false, Exhausted: true}
+			return series.ScrapeResult{Exhausted: true}
 		} else if options.LengthDuration != 0 {
 			if options.LengthDurationExclusive {
 				if currentElapsedTime >= options.LengthDuration {
-					return series.ScrapeResult{Value: 0, Missing: false, Exhausted: true}
+					return series.ScrapeResult{Exhausted: true}
 				}
 			} else {
 				if currentElapsedTime > options.LengthDuration {
-					return series.ScrapeResult{Value: 0, Missing: false, Exhausted: true}
+					return series.ScrapeResult{Exhausted: true}
 				}
 			}
 		}
 
-		return series.ScrapeResult{Value: 0, Missing: true, Exhausted: false}
+		return series.ScrapeResult{Missing: true}
 	}, nil
 }
 
