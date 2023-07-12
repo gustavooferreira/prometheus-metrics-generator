@@ -2,8 +2,9 @@ package datafuncs
 
 import (
 	"fmt"
-	"gustavooferreira/prometheus-metrics-generator/series"
 	"time"
+
+	"gustavooferreira/prometheus-metrics-generator/series"
 )
 
 // LinearSegmentDataIterator returns a DataIterator representing a linear segment.
