@@ -22,7 +22,7 @@ import (
 func LinearSegmentDataIterator(options LinearSegmentDataIteratorOptions) (series.DataIterator, error) {
 	// validation
 	if options.LengthDuration == 0 && options.LengthIterationCount == 0 {
-		return nil, fmt.Errorf("a stop condition needs to be provided, either set the length duration or" +
+		return nil, fmt.Errorf("stop condition needs to be provided, either set the length duration or " +
 			"length iteration count")
 	}
 
@@ -39,7 +39,7 @@ func LinearSegmentDataIterator(options LinearSegmentDataIteratorOptions) (series
 	}
 
 	if options.LengthDurationExclusive && options.LengthDuration == 0 {
-		return nil, fmt.Errorf("length duration exclusive option applies to length duration option only, but" +
+		return nil, fmt.Errorf("length duration exclusive option applies to length duration option only, but " +
 			"length duration is not set")
 	}
 
