@@ -12,7 +12,7 @@ type DataIterator func(scrapeInfo ScrapeInfo) ScrapeResult
 
 // ScrapeInfo contains information about the scrape.
 type ScrapeInfo struct {
-	// FirstIterationTime represents the time at which the first iteration (scrape) happened.
+	// FirstIterationTime represents the time at which the very first iteration (scrape) happened.
 	FirstIterationTime time.Time
 
 	// IterationCount specifies the count for this iteration.

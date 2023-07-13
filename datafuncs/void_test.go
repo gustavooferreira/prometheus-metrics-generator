@@ -269,4 +269,49 @@ func TestVoidDataIterator(t *testing.T) {
 		)
 		assert.True(t, results[4].scrapeResult.Missing)
 	})
+
+	t.Run("should return a single data point given the duration length", func(t *testing.T) {
+		scraper, err := series.NewScraper(
+			series.ScraperConfig{
+				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
+				ScrapeInterval: 15 * time.Second,
+			},
+			series.WithScraperIterationCountLimit(100), // It's good practice to set an upper bound in tests
+		)
+		require.NoError(t, err)
+
+		lsDataIterator, err := datafuncs.VoidDataIterator(datafuncs.VoidDataIteratorOptions{
+			LengthDuration: 10 * time.Second,
+		})
+		require.NoError(t, err)
+
+		type resultContainer struct {
+			scrapeInfo   series.ScrapeInfo
+			scrapeResult series.ScrapeResult
+		}
+
+		var results []resultContainer
+		scrapeHandler := func(scrapeInfo series.ScrapeInfo, scrapeResult series.ScrapeResult) error {
+			results = append(results, resultContainer{
+				scrapeInfo:   scrapeInfo,
+				scrapeResult: scrapeResult,
+			})
+			return nil
+		}
+
+		err = scraper.Scrape(lsDataIterator, scrapeHandler)
+		require.NoError(t, err)
+
+		for _, r := range results {
+			t.Logf("[%3d] Timestamp: %s - Missing: %t\n",
+				r.scrapeInfo.IterationCount,
+				r.scrapeInfo.IterationTime,
+				r.scrapeResult.Missing,
+			)
+		}
+
+		require.Equal(t, 5, len(results))
+		assert.True(t, results[0].scrapeResult.Missing)
+		assert.True(t, results[4].scrapeResult.Missing)
+	})
 }

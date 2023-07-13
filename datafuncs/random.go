@@ -8,10 +8,6 @@ import (
 	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
-// Generate random noise
-// Provide amplitude range
-// Generate int range but then return it as a float
-
 // RandomDataIterator returns a DataIterator representing a random sequence of samples.
 // Note that it's an error to use negative values with counters. It's the user responsibility to make sure negative
 // numbers only appear in gauges.
