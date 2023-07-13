@@ -7,10 +7,8 @@ import (
 	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
-// TODO: write unit test where we just get a single data point.
 // VoidDataIterator returns a DataIterator representing a period of missing scrapes.
-// This function is useful to simulate a chunk of time where a given metric goes missing.
-// Provide a function that just returns -1 so that we can have no metric for that duration or number of iteration.
+// This function is useful to simulate a chunk of time when a given metric goes missing.
 func VoidDataIterator(options VoidDataIteratorOptions) (series.DataIterator, error) {
 	// validation
 	if options.LengthDuration == 0 && options.LengthIterationCount == 0 {
@@ -42,6 +40,8 @@ func VoidDataIterator(options VoidDataIteratorOptions) (series.DataIterator, err
 	var firstIterationCount int
 	var firstScrapeTime time.Time
 
+	// TODO: This is wrong, we always return at least one sample! The very first one.
+	// This reveals a bug... we shoud not return the very first sample when dealing with time!
 	// We might never return a single sample if lengthDuration is less than the time it took to scrape for the first time
 	return func(scrapeInfo series.ScrapeInfo) series.ScrapeResult {
 		// Is this the first scrape?
