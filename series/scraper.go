@@ -54,6 +54,7 @@ func (s *Scraper) Iterator() ScraperIterator {
 // For each generated scrape, this function will call the ScrapeHandler provided.
 // This function terminates when the DataIterator has no more data left, or there are no more scrapes to be generated,
 // or the ScrapeHandler returns an error.
+// TODO: This function only works with discrete data functions. Do we want to remove it?
 func (s *Scraper) Scrape(dataIterator DataIterator, scrapeHandler ScrapeHandler) error {
 	for iter := s.Iterator(); iter.HasNext(); {
 		scrapeInfo := iter.Next()

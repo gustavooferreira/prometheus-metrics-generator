@@ -147,8 +147,6 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 			return nil
 		}
 
-		// ----------------------------
-
 		skipNTimes := 25
 		skipCount := 0
 		for iter := scraper.Iterator(); iter.HasNext(); {
