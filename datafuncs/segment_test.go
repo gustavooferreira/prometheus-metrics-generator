@@ -1,13 +1,14 @@
 package datafuncs_test
 
 import (
-	"gustavooferreira/prometheus-metrics-generator/datafuncs"
-	"gustavooferreira/prometheus-metrics-generator/series"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/gustavooferreira/prometheus-metrics-generator/datafuncs"
+	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
 func TestLinearSegmentDataIterator(t *testing.T) {
@@ -80,7 +81,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		require.NoError(t, err)
 
 		lsDataIterator, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart:       11,
+			AmplitudeStart:       10,
 			AmplitudeEnd:         20,
 			LengthIterationCount: 10,
 		})
@@ -112,7 +113,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		}
 
 		require.Equal(t, 10, len(results))
-		assert.InDelta(t, 11, results[0].scrapeResult.Value, 0.001)
+		assert.InDelta(t, 10, results[0].scrapeResult.Value, 0.001)
 		assert.InDelta(t, 20, results[9].scrapeResult.Value, 0.001)
 	})
 
@@ -127,7 +128,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		require.NoError(t, err)
 
 		lsDataIterator, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart: 11,
+			AmplitudeStart: 10,
 			AmplitudeEnd:   20,
 			LengthDuration: time.Minute,
 		})
@@ -159,7 +160,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		}
 
 		require.Equal(t, 5, len(results))
-		assert.InDelta(t, 11, results[0].scrapeResult.Value, 0.001)
+		assert.InDelta(t, 10, results[0].scrapeResult.Value, 0.001)
 		assert.InDelta(t, 20, results[4].scrapeResult.Value, 0.001)
 	})
 
@@ -174,7 +175,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		require.NoError(t, err)
 
 		lsDataIterator, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-			AmplitudeStart:          11,
+			AmplitudeStart:          10,
 			AmplitudeEnd:            20,
 			LengthDuration:          time.Minute,
 			LengthDurationExclusive: true,
@@ -207,8 +208,8 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		}
 
 		require.Equal(t, 4, len(results))
-		assert.InDelta(t, 11, results[0].scrapeResult.Value, 0.001)
-		assert.InDelta(t, 17.75, results[3].scrapeResult.Value, 0.001)
+		assert.InDelta(t, 10, results[0].scrapeResult.Value, 0.001)
+		assert.InDelta(t, 17.50, results[3].scrapeResult.Value, 0.001)
 	})
 
 	t.Run("should produce valid values for a horizontal line", func(t *testing.T) {

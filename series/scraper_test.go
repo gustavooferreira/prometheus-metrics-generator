@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
 func TestScraper(t *testing.T) {

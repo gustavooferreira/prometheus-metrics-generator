@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
 // LinearSegmentDataIterator returns a DataIterator representing a linear segment.
@@ -54,11 +54,8 @@ func LinearSegmentDataIterator(options LinearSegmentDataIteratorOptions) (series
 	// We might never return a single sample if LengthDuration is less than the time it took to scrape for the first
 	// time.
 	return func(scrapeInfo series.ScrapeInfo) series.ScrapeResult {
-		firstScrapeInProgress := false
-
 		// Is this the first scrape?
 		if !firstScrapeHappened {
-			firstScrapeInProgress = true
 			firstScrapeHappened = true
 			firstIterationCount = scrapeInfo.IterationCount
 			firstScrapeTime = scrapeInfo.IterationTime
@@ -84,7 +81,7 @@ func LinearSegmentDataIterator(options LinearSegmentDataIteratorOptions) (series
 		}
 
 		// If this is the first scrape, return the AmplitudeStart
-		if firstScrapeInProgress {
+		if currentIterationCount == 0 {
 			return series.ScrapeResult{Value: options.AmplitudeStart}
 		}
 
@@ -94,7 +91,7 @@ func LinearSegmentDataIterator(options LinearSegmentDataIteratorOptions) (series
 		}
 
 		if options.LengthIterationCount != 0 { // perform calculations based on iteration count
-			slope := (options.AmplitudeEnd - options.AmplitudeStart + 1) / (float64(options.LengthIterationCount))
+			slope := (options.AmplitudeEnd - options.AmplitudeStart) / float64(options.LengthIterationCount-1)
 			value := options.AmplitudeStart + slope*float64(currentIterationCount)
 			return series.ScrapeResult{Value: value}
 		} else if options.LengthDuration != 0 { // perform calculations based on elapsed time

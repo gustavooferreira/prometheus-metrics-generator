@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gustavooferreira/prometheus-metrics-generator/datafuncs"
-	"gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/datafuncs"
+	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
 func TestCustomValuesDataIterator(t *testing.T) {

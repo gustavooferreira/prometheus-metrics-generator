@@ -2,9 +2,10 @@ package datafuncs
 
 import (
 	"fmt"
-	"gustavooferreira/prometheus-metrics-generator/series"
 	"math/rand"
 	"time"
+
+	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
 // Generate random noise
