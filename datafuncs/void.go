@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
 // TODO: write unit test where we just get a single data point.

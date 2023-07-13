@@ -1,7 +1,7 @@
 package datafuncs
 
 import (
-	"gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
 // CustomValuesDataIterator returns a DataIterator containing the array of values passed in.

@@ -1,13 +1,13 @@
 package series_test
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
 func TestScraperConfig(t *testing.T) {
