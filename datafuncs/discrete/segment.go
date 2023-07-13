@@ -6,6 +6,9 @@ import (
 	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
+// Check at compile time whether LinearSegmentDataIterator.Evaluate fulfills the DataIterator function type.
+var _ series.DataIterator = LinearSegmentDataIterator{}.Evaluate
+
 // LinearSegmentDataIterator returns a DataIterator representing a linear segment.
 // A linear segment can be horizontal or have a positive or negative slope.
 // Linear segments can be put together, with the help of the Join function, to form more complex structures.
