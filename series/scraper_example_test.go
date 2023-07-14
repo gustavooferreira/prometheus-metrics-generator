@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/datafuncs"
+	"github.com/gustavooferreira/prometheus-metrics-generator/datafuncs/discrete"
 	"github.com/gustavooferreira/prometheus-metrics-generator/series"
 )
 
@@ -20,10 +20,10 @@ func ExampleScraper() {
 		panic(err)
 	}
 
-	lsDataIterator, err := datafuncs.LinearSegmentDataIterator(datafuncs.LinearSegmentDataIteratorOptions{
-		AmplitudeStart:       50,
-		AmplitudeEnd:         70,
-		LengthIterationCount: 5,
+	lsDataIterator, err := discrete.NewLinearSegmentDataIterator(discrete.LinearSegmentDataIteratorOptions{
+		AmplitudeStart:      50,
+		AmplitudeEnd:        70,
+		IterationCountLimit: 5,
 	})
 	if err != nil {
 		panic(err)
@@ -38,7 +38,7 @@ func ExampleScraper() {
 		return nil
 	}
 
-	err = scraper.Scrape(lsDataIterator, scrapeHandler)
+	err = scraper.Scrape(lsDataIterator.Evaluate, scrapeHandler)
 	if err != nil {
 		panic(err)
 	}

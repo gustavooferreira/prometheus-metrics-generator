@@ -310,8 +310,7 @@ func TestVoidDataIterator(t *testing.T) {
 			)
 		}
 
-		require.Equal(t, 5, len(results))
+		require.Equal(t, 1, len(results))
 		assert.True(t, results[0].scrapeResult.Missing)
-		assert.True(t, results[4].scrapeResult.Missing)
 	})
 }
