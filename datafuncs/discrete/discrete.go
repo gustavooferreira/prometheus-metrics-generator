@@ -10,7 +10,7 @@ type DataGenerator interface {
 }
 
 type DataIterator interface {
-	Iterate(info series.ScrapeInfo) series.ScrapeResult
+	Iterate(series.ScrapeInfo) series.ScrapeResult
 }
 
 // DataSpec defines the data node type.

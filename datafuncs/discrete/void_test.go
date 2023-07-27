@@ -16,7 +16,7 @@ func TestVoidDataIterator(t *testing.T) {
 		require.Equal(t, 0, len(results))
 	})
 
-	t.Run("should return any sample when count is negative", func(t *testing.T) {
+	t.Run("should not return any sample when count is negative", func(t *testing.T) {
 		dataGenerator := discrete.Void(-5)
 		results := helperScraper(t, dataGenerator.Iterator())
 		require.Equal(t, 0, len(results))
