@@ -7,6 +7,8 @@ import (
 // Check at compile time whether VoidDataGenerator implements DataGenerator interface.
 var _ DataGenerator = (*VoidDataGenerator)(nil)
 
+// VoidDataGenerator returns a DataGenerator representing a period of missing scrapes.
+// This function is useful to simulate a chunk of time when a given metric goes missing.
 type VoidDataGenerator struct {
 	count int
 }
