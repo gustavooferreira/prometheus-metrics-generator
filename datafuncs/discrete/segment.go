@@ -68,35 +68,26 @@ type LinearSegmentIterator struct {
 	linearSegment LinearSegment
 	slope         float64
 
-	// These 2 variables keep track of the first scrape when running the iterator.
-	// This allows us to keep track of how many iterations we've been running for.
-	// All calculations are performed relative to the first detected scrape.
-	firstScrapeHappened bool
-	firstIterationCount int
+	// iterCount represents the cycle the iterator is in
+	iterCount int
 }
 
 // Iterate fulfills the DataIterator interface.
 // This function is responsible for returning the data points one at a time.
 func (lsi *LinearSegmentIterator) Iterate(scrapeInfo series.ScrapeInfo) series.ScrapeResult {
-	// Is this the first scrape?
-	if !lsi.firstScrapeHappened {
-		lsi.firstScrapeHappened = true
-		lsi.firstIterationCount = scrapeInfo.IterationCount
-	}
-
-	// Normalize
-	currentIterationCount := scrapeInfo.IterationCount - lsi.firstIterationCount
-
 	// Have we reached the end?
-	if currentIterationCount >= lsi.linearSegment.options.IterationCountLimit {
+	if lsi.iterCount >= lsi.linearSegment.options.IterationCountLimit {
 		return series.ScrapeResult{Exhausted: true}
 	}
+
+	// Make sure to increment the iterator counter before leaving the function
+	defer func() { lsi.iterCount++ }()
 
 	// If we have a horizontal line, there is no need to do any computation
 	if lsi.linearSegment.options.AmplitudeStart == lsi.linearSegment.options.AmplitudeEnd {
 		return series.ScrapeResult{Value: lsi.linearSegment.options.AmplitudeStart}
 	}
 
-	value := lsi.linearSegment.options.AmplitudeStart + lsi.slope*float64(currentIterationCount)
+	value := lsi.linearSegment.options.AmplitudeStart + lsi.slope*float64(lsi.iterCount)
 	return series.ScrapeResult{Value: value}
 }
