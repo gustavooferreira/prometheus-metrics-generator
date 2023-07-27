@@ -8,7 +8,13 @@ import "time"
 // The field Exhausted in the ScrapeResult struct reports whether there is no more data to be returned by the iterator.
 // Counter resets can be simulated by setting the Value field to zero.
 // Missing scrapes can be simulated by setting the Missing field to true.
-type DataIterator func(scrapeInfo ScrapeInfo) ScrapeResult
+// TODO: Nope, let's define an interface insteas!
+// TODO: Let's define a DataIteratorFunc just line the HandlerFunc!
+type DataIterator2 func(scrapeInfo ScrapeInfo) ScrapeResult
+
+type DataIterator interface {
+	Iterate(scrapeInfo ScrapeInfo) ScrapeResult
+}
 
 // ScrapeInfo contains information about the scrape.
 type ScrapeInfo struct {

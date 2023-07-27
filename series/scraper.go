@@ -59,7 +59,7 @@ func (s *Scraper) Scrape(dataIterator DataIterator, scrapeHandler ScrapeHandler)
 	for iter := s.Iterator(); iter.HasNext(); {
 		scrapeInfo := iter.Next()
 
-		scrapeResult := dataIterator(scrapeInfo)
+		scrapeResult := dataIterator.Iterate(scrapeInfo)
 		if scrapeResult.Exhausted {
 			// exhausted time series
 			return nil

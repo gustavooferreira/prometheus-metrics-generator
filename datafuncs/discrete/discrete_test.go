@@ -31,18 +31,8 @@ func helperScraper(t *testing.T, dataIterator series.DataIterator) []resultConta
 		return nil
 	}
 
-	for iter := scraper.Iterator(); iter.HasNext(); {
-		scrapeInfo := iter.Next()
-
-		scrapeResult := dataIterator(scrapeInfo)
-		if scrapeResult.Exhausted {
-			// exhausted time series samples
-			break
-		}
-
-		err := scrapeHandler(scrapeInfo, scrapeResult)
-		require.NoError(t, err)
-	}
+	err = scraper.Scrape(dataIterator, scrapeHandler)
+	require.NoError(t, err)
 
 	for _, r := range results {
 		t.Logf("[%3d] Timestamp: %s - Value: %6.2f - Missing: %t\n",
