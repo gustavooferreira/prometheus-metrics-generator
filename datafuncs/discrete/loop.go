@@ -27,7 +27,10 @@ func (ldg *LoopDataGenerator) Iterator() DataIterator {
 }
 
 func (ldg *LoopDataGenerator) Describe() DataSpec {
-	return nil
+	return LoopDataSpec{
+		Count: ldg.count,
+		Func:  ldg.Describe(),
+	}
 }
 
 // Check at compile time whether LoopDataIterator implements DataIterator interface.
@@ -67,6 +70,7 @@ var _ DataSpec = (*LoopDataSpec)(nil)
 // LoopDataSpec implements a generic DataSpec for the Loop container.
 type LoopDataSpec struct {
 	Count int
+	Func  DataSpec
 }
 
 func (lds LoopDataSpec) DataGeneratorNodeType() DataGeneratorNodeType {
