@@ -1,4 +1,4 @@
-package series
+package metrics
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ type ScraperConfig struct {
 // validate validates the configuration.
 func (sc *ScraperConfig) validate() error {
 	if sc.ScrapeInterval <= time.Duration(0) {
-		return fmt.Errorf("scrape interval cannot be less or equal to zero")
+		return fmt.Errorf("scrape interval cannot be less than or equal to zero")
 	}
 
 	// if end time is set, make sure it comes after start time.

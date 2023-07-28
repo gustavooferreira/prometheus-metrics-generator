@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/datafuncs/discrete"
+	"github.com/gustavooferreira/prometheus-metrics-generator/discrete"
 )
 
 func TestRandomDataIterator(t *testing.T) {

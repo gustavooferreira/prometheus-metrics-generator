@@ -1,16 +1,12 @@
 package discrete
 
 import (
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 type DataGenerator interface {
-	Iterator() DataIterator
+	Iterator() metrics.DataIterator
 	Describe() DataSpec
-}
-
-type DataIterator interface {
-	Iterate(series.ScrapeInfo) series.ScrapeResult
 }
 
 // DataSpec defines the data node type.

@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/datafuncs/discrete"
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/discrete"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 func TestLinearSegmentDataIterator(t *testing.T) {
@@ -82,12 +82,12 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 	})
 
 	t.Run("should produce valid results even though data is shifted in time", func(t *testing.T) {
-		scraper, err := series.NewScraper(
-			series.ScraperConfig{
+		scraper, err := metrics.NewScraper(
+			metrics.ScraperConfig{
 				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 				ScrapeInterval: 15 * time.Second,
 			},
-			series.WithScraperIterationCountLimit(100), // It's good practice to set an upper bound in tests
+			metrics.WithScraperIterationCountLimit(100), // It's good practice to set an upper bound in tests
 		)
 		require.NoError(t, err)
 
@@ -99,12 +99,12 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		require.NoError(t, err)
 
 		type resultContainer struct {
-			scrapeInfo   series.ScrapeInfo
-			scrapeResult series.ScrapeResult
+			scrapeInfo   metrics.ScrapeInfo
+			scrapeResult metrics.ScrapeResult
 		}
 
 		var results []resultContainer
-		scrapeHandler := func(scrapeInfo series.ScrapeInfo, scrapeResult series.ScrapeResult) error {
+		scrapeHandler := func(scrapeInfo metrics.ScrapeInfo, scrapeResult metrics.ScrapeResult) error {
 			results = append(results, resultContainer{
 				scrapeInfo:   scrapeInfo,
 				scrapeResult: scrapeResult,
@@ -124,7 +124,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 				continue
 			}
 
-			scrapeResult := iterator.Iterate(scrapeInfo)
+			scrapeResult := iterator.Evaluate(scrapeInfo)
 			if scrapeResult.Exhausted {
 				// exhausted time series samples
 				break

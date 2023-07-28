@@ -3,7 +3,7 @@ package discrete
 import (
 	"fmt"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 // LinearSegmentOptions contains the options for the LinearSegment.
@@ -42,7 +42,7 @@ func NewLinearSegment(options LinearSegmentOptions) (*LinearSegment, error) {
 	}, nil
 }
 
-func (ls *LinearSegment) Iterator() DataIterator {
+func (ls *LinearSegment) Iterator() metrics.DataIterator {
 	slope := 0.0
 	if ls.options.IterationCountLimit >= 2 {
 		slope = (ls.options.AmplitudeEnd - ls.options.AmplitudeStart) / float64(ls.options.IterationCountLimit-1)
@@ -60,8 +60,8 @@ func (ls *LinearSegment) Describe() DataSpec {
 	}
 }
 
-// Check at compile time whether LinearSegmentIterator implements DataIterator interface.
-var _ DataIterator = (*LinearSegmentIterator)(nil)
+// Check at compile time whether LinearSegmentIterator implements metrics.DataIterator interface.
+var _ metrics.DataIterator = (*LinearSegmentIterator)(nil)
 
 type LinearSegmentIterator struct {
 	// read-only access
@@ -72,12 +72,12 @@ type LinearSegmentIterator struct {
 	iterCount int
 }
 
-// Iterate fulfills the DataIterator interface.
+// Evaluate fulfills the metrics.DataIterator interface.
 // This function is responsible for returning the data points one at a time.
-func (lsi *LinearSegmentIterator) Iterate(scrapeInfo series.ScrapeInfo) series.ScrapeResult {
+func (lsi *LinearSegmentIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
 	// Have we reached the end?
 	if lsi.iterCount >= lsi.linearSegment.options.IterationCountLimit {
-		return series.ScrapeResult{Exhausted: true}
+		return metrics.ScrapeResult{Exhausted: true}
 	}
 
 	// Make sure to increment the iterator counter before leaving the function
@@ -85,9 +85,9 @@ func (lsi *LinearSegmentIterator) Iterate(scrapeInfo series.ScrapeInfo) series.S
 
 	// If we have a horizontal line, there is no need to do any computation
 	if lsi.linearSegment.options.AmplitudeStart == lsi.linearSegment.options.AmplitudeEnd {
-		return series.ScrapeResult{Value: lsi.linearSegment.options.AmplitudeStart}
+		return metrics.ScrapeResult{Value: lsi.linearSegment.options.AmplitudeStart}
 	}
 
 	value := lsi.linearSegment.options.AmplitudeStart + lsi.slope*float64(lsi.iterCount)
-	return series.ScrapeResult{Value: value}
+	return metrics.ScrapeResult{Value: value}
 }

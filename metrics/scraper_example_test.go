@@ -1,26 +1,26 @@
-package series_test
+package metrics_test
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/datafuncs/discrete"
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/discrete"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 func ExampleScraper() {
-	scraper, err := series.NewScraper(
-		series.ScraperConfig{
+	scraper, err := metrics.NewScraper(
+		metrics.ScraperConfig{
 			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			ScrapeInterval: 15 * time.Second,
 		},
-		series.WithScraperIterationCountLimit(100), // It's good practice to set an upper bound in tests
+		metrics.WithScraperIterationCountLimit(100), // It's good practice to set an upper bound in tests
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	lsDataIterator, err := discrete.NewLinearSegmentDataIterator(discrete.LinearSegmentDataIteratorOptions{
+	lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
 		AmplitudeStart:      50,
 		AmplitudeEnd:        70,
 		IterationCountLimit: 5,
@@ -29,7 +29,7 @@ func ExampleScraper() {
 		panic(err)
 	}
 
-	scrapeHandler := func(scrapeInfo series.ScrapeInfo, scrapeResult series.ScrapeResult) error {
+	scrapeHandler := func(scrapeInfo metrics.ScrapeInfo, scrapeResult metrics.ScrapeResult) error {
 		fmt.Printf("[%3d] Timestamp: %s - Value: %.2f\n",
 			scrapeInfo.IterationCount,
 			scrapeInfo.IterationTime,
@@ -38,7 +38,7 @@ func ExampleScraper() {
 		return nil
 	}
 
-	err = scraper.Scrape(lsDataIterator.Evaluate, scrapeHandler)
+	err = scraper.Scrape(lsDataGenerator.Iterator(), scrapeHandler)
 	if err != nil {
 		panic(err)
 	}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 // RandomOptions contains the options for the Random.
@@ -48,7 +48,7 @@ func NewRandom(options RandomOptions) (*Random, error) {
 	}, nil
 }
 
-func (r *Random) Iterator() DataIterator {
+func (r *Random) Iterator() metrics.DataIterator {
 	return &RandomIterator{
 		random: *r,
 	}
@@ -60,8 +60,8 @@ func (r *Random) Describe() DataSpec {
 	}
 }
 
-// Check at compile time whether RandomIterator implements DataIterator interface.
-var _ DataIterator = (*RandomIterator)(nil)
+// Check at compile time whether RandomIterator implements metrics.DataIterator interface.
+var _ metrics.DataIterator = (*RandomIterator)(nil)
 
 type RandomIterator struct {
 	// read-only access
@@ -71,12 +71,12 @@ type RandomIterator struct {
 	iterCount int
 }
 
-// Iterate fulfills the DataIterator interface.
+// Evaluate fulfills the metrics.DataIterator interface.
 // This function is responsible for returning the data points one at a time.
-func (ri *RandomIterator) Iterate(scrapeInfo series.ScrapeInfo) series.ScrapeResult {
+func (ri *RandomIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
 	// Have we reached the end?
 	if ri.iterCount >= ri.random.options.IterationCountLimit {
-		return series.ScrapeResult{Exhausted: true}
+		return metrics.ScrapeResult{Exhausted: true}
 	}
 
 	// Make sure to increment the iterator counter before leaving the function
@@ -84,5 +84,5 @@ func (ri *RandomIterator) Iterate(scrapeInfo series.ScrapeInfo) series.ScrapeRes
 
 	randomValue := rand.Float64()*(ri.random.options.AmplitudeMax-ri.random.options.AmplitudeMin) +
 		ri.random.options.AmplitudeMin
-	return series.ScrapeResult{Value: randomValue}
+	return metrics.ScrapeResult{Value: randomValue}
 }

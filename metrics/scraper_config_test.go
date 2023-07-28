@@ -1,4 +1,4 @@
-package series_test
+package metrics_test
 
 import (
 	"testing"
@@ -7,12 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 func TestScraperConfig(t *testing.T) {
 	t.Run("should fail validation check when provided with a negative scrape interval", func(t *testing.T) {
-		scraperConfig := series.ScraperConfig{
+		scraperConfig := metrics.ScraperConfig{
 			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			ScrapeInterval: -1 * time.Second,
 		}
@@ -24,13 +24,13 @@ func TestScraperConfig(t *testing.T) {
 	})
 
 	t.Run("should fail validation check when provided with an end time before start time", func(t *testing.T) {
-		scraperConfig := series.ScraperConfig{
+		scraperConfig := metrics.ScraperConfig{
 			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			ScrapeInterval: 1 * time.Second,
 		}
 
 		scraperConfig.ApplyFunctionalOptions(
-			series.WithScraperEndTime(time.Date(2023, 1, 1, 9, 0, 0, 0, time.UTC)),
+			metrics.WithScraperEndTime(time.Date(2023, 1, 1, 9, 0, 0, 0, time.UTC)),
 		)
 
 		err := scraperConfig.Validate()
@@ -40,13 +40,13 @@ func TestScraperConfig(t *testing.T) {
 	})
 
 	t.Run("should fail validation check when provided with a negative iteration count limit", func(t *testing.T) {
-		scraperConfig := series.ScraperConfig{
+		scraperConfig := metrics.ScraperConfig{
 			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			ScrapeInterval: 1 * time.Second,
 		}
 
 		scraperConfig.ApplyFunctionalOptions(
-			series.WithScraperIterationCountLimit(-10),
+			metrics.WithScraperIterationCountLimit(-10),
 		)
 
 		err := scraperConfig.Validate()
@@ -56,7 +56,7 @@ func TestScraperConfig(t *testing.T) {
 	})
 
 	t.Run("should pass validation check when provided sane values", func(t *testing.T) {
-		scraperConfig := series.ScraperConfig{
+		scraperConfig := metrics.ScraperConfig{
 			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			ScrapeInterval: 15 * time.Second,
 		}
@@ -66,14 +66,14 @@ func TestScraperConfig(t *testing.T) {
 	})
 
 	t.Run("should pass validation check when provided sane values including functional options", func(t *testing.T) {
-		scraperConfig := series.ScraperConfig{
+		scraperConfig := metrics.ScraperConfig{
 			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			ScrapeInterval: 15 * time.Second,
 		}
 
 		scraperConfig.ApplyFunctionalOptions(
-			series.WithScraperEndTime(time.Date(2023, 1, 1, 11, 0, 0, 0, time.UTC)),
-			series.WithScraperIterationCountLimit(10),
+			metrics.WithScraperEndTime(time.Date(2023, 1, 1, 11, 0, 0, 0, time.UTC)),
+			metrics.WithScraperIterationCountLimit(10),
 		)
 
 		err := scraperConfig.Validate()

@@ -6,24 +6,24 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 // helperScraper computes the data function results given a DataIterator.
-func helperScraper(t *testing.T, dataIterator series.DataIterator) []resultContainer {
+func helperScraper(t *testing.T, dataIterator metrics.DataIterator) []resultContainer {
 	t.Helper()
 
-	scraper, err := series.NewScraper(
-		series.ScraperConfig{
+	scraper, err := metrics.NewScraper(
+		metrics.ScraperConfig{
 			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			ScrapeInterval: 15 * time.Second,
 		},
-		series.WithScraperIterationCountLimit(100), // It's good practice to set an upper bound in tests
+		metrics.WithScraperIterationCountLimit(100), // It's good practice to set an upper bound in tests
 	)
 	require.NoError(t, err)
 
 	var results []resultContainer
-	scrapeHandler := func(scrapeInfo series.ScrapeInfo, scrapeResult series.ScrapeResult) error {
+	scrapeHandler := func(scrapeInfo metrics.ScrapeInfo, scrapeResult metrics.ScrapeResult) error {
 		results = append(results, resultContainer{
 			scrapeInfo:   scrapeInfo,
 			scrapeResult: scrapeResult,
@@ -47,6 +47,6 @@ func helperScraper(t *testing.T, dataIterator series.DataIterator) []resultConta
 }
 
 type resultContainer struct {
-	scrapeInfo   series.ScrapeInfo
-	scrapeResult series.ScrapeResult
+	scrapeInfo   metrics.ScrapeInfo
+	scrapeResult metrics.ScrapeResult
 }

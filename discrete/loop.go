@@ -1,7 +1,7 @@
 package discrete
 
 import (
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 // Check at compile time whether LoopDataGenerator implements DataGenerator interface.
@@ -20,7 +20,7 @@ func Loop(dataGenerator DataGenerator, count int) *LoopDataGenerator {
 	}
 }
 
-func (ldg *LoopDataGenerator) Iterator() DataIterator {
+func (ldg *LoopDataGenerator) Iterator() metrics.DataIterator {
 	return &LoopDataIterator{
 		loopDataGenerator: *ldg,
 	}
@@ -33,26 +33,26 @@ func (ldg *LoopDataGenerator) Describe() DataSpec {
 	}
 }
 
-// Check at compile time whether LoopDataIterator implements DataIterator interface.
-var _ DataIterator = (*LoopDataIterator)(nil)
+// Check at compile time whether LoopDataIterator implements metrics.DataIterator interface.
+var _ metrics.DataIterator = (*LoopDataIterator)(nil)
 
 type LoopDataIterator struct {
 	loopDataGenerator LoopDataGenerator
 
 	// these variables keep track of the current state of the iterator
 	dataGeneratorLoopCount int
-	dataIterator           DataIterator
+	dataIterator           metrics.DataIterator
 }
 
-// Iterate fulfills the DataIterator interface.
+// Evaluate fulfills the metrics.DataIterator interface.
 // This function is responsible for returning the data points one at a time.
-func (ldi *LoopDataIterator) Iterate(scrapeInfo series.ScrapeInfo) series.ScrapeResult {
+func (ldi *LoopDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
 	for ; ldi.dataGeneratorLoopCount < ldi.loopDataGenerator.count; ldi.dataGeneratorLoopCount++ {
 		if ldi.dataIterator == nil {
 			ldi.dataIterator = ldi.loopDataGenerator.dataGenerator.Iterator()
 		}
 
-		result := ldi.dataIterator.Iterate(scrapeInfo)
+		result := ldi.dataIterator.Evaluate(scrapeInfo)
 		if result.Exhausted {
 			ldi.dataIterator = nil
 			continue
@@ -61,7 +61,7 @@ func (ldi *LoopDataIterator) Iterate(scrapeInfo series.ScrapeInfo) series.Scrape
 		return result
 	}
 
-	return series.ScrapeResult{Exhausted: true}
+	return metrics.ScrapeResult{Exhausted: true}
 }
 
 // Check at compile time whether LoopDataSpec implements DataSpec interface.

@@ -1,7 +1,7 @@
 package discrete
 
 import (
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 // Check at compile time whether CustomValuesDataGenerator implements DataGenerator interface.
@@ -26,7 +26,7 @@ func NewCustomValuesDataGenerator(values []CustomValue) *CustomValuesDataGenerat
 	}
 }
 
-func (cvdg *CustomValuesDataGenerator) Iterator() DataIterator {
+func (cvdg *CustomValuesDataGenerator) Iterator() metrics.DataIterator {
 	return &CustomValuesDataIterator{
 		customValuesDataGenerator: *cvdg,
 	}
@@ -39,7 +39,7 @@ func (cvdg *CustomValuesDataGenerator) Describe() DataSpec {
 }
 
 // Check at compile time whether CustomValuesDataIterator implements DataIterator interface.
-var _ DataIterator = (*CustomValuesDataIterator)(nil)
+var _ metrics.DataIterator = (*CustomValuesDataIterator)(nil)
 
 type CustomValuesDataIterator struct {
 	customValuesDataGenerator CustomValuesDataGenerator
@@ -48,12 +48,12 @@ type CustomValuesDataIterator struct {
 	iterCount int
 }
 
-// Iterate fulfills the DataIterator interface.
+// Evaluate fulfills the metrics.DataIterator interface.
 // This function is responsible for returning the data points one at a time.
-func (cvdi *CustomValuesDataIterator) Iterate(scrapeInfo series.ScrapeInfo) series.ScrapeResult {
+func (cvdi *CustomValuesDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
 	// check if index is inside the boundaries, if not, return exhausted
 	if cvdi.iterCount >= len(cvdi.customValuesDataGenerator.values) {
-		return series.ScrapeResult{Exhausted: true}
+		return metrics.ScrapeResult{Exhausted: true}
 	}
 
 	// Make sure to increment the iterator counter before leaving the function
@@ -61,7 +61,7 @@ func (cvdi *CustomValuesDataIterator) Iterate(scrapeInfo series.ScrapeInfo) seri
 
 	result := cvdi.customValuesDataGenerator.values[cvdi.iterCount]
 
-	return series.ScrapeResult{
+	return metrics.ScrapeResult{
 		Value:   result.Value,
 		Missing: result.Missing,
 	}

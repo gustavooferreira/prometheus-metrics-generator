@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 // Check at compile time whether LinearSegmentDataIterator implements DataIterator interface.
@@ -38,29 +38,29 @@ func NewLinearSegmentDataIterator(options LinearSegmentDataIteratorOptions) (*Li
 }
 
 // Evaluate computes a sample given a scrape.
-func (ls *LinearSegmentDataIterator) Evaluate(scrapeInfo ScrapeInfo) series.ScrapeResult {
+func (ls *LinearSegmentDataIterator) Evaluate(scrapeInfo ScrapeInfo) metrics.ScrapeResult {
 	// Normalize
 	currentElapsedTime := scrapeInfo.IterationTime.Sub(scrapeInfo.FunctionStartTime)
 
 	// Deal with boundaries
 	if scrapeInfo.IterationTime.Before(scrapeInfo.FunctionStartTime) { // if before time, return missing
-		return series.ScrapeResult{Missing: true}
+		return metrics.ScrapeResult{Missing: true}
 	} else if scrapeInfo.IterationTime.Equal(scrapeInfo.FunctionStartTime) && ls.options.IntervalLeftBoundOpen {
-		return series.ScrapeResult{Missing: true}
+		return metrics.ScrapeResult{Missing: true}
 	} else if currentElapsedTime == ls.options.DurationLength && ls.options.IntervalRightBoundOpen {
-		return series.ScrapeResult{Exhausted: true}
+		return metrics.ScrapeResult{Exhausted: true}
 	} else if currentElapsedTime > ls.options.DurationLength { // we are past the duration length for this function
-		return series.ScrapeResult{Exhausted: true}
+		return metrics.ScrapeResult{Exhausted: true}
 	}
 
 	// If we have a horizontal line, there is no need to do any computation
 	if ls.options.AmplitudeStart == ls.options.AmplitudeEnd {
-		return series.ScrapeResult{Value: ls.options.AmplitudeStart}
+		return metrics.ScrapeResult{Value: ls.options.AmplitudeStart}
 	}
 
 	slope := (ls.options.AmplitudeEnd - ls.options.AmplitudeStart) / (float64(ls.options.DurationLength))
 	value := ls.options.AmplitudeStart + slope*float64(currentElapsedTime)
-	return series.ScrapeResult{Value: value}
+	return metrics.ScrapeResult{Value: value}
 }
 
 // Duration reports the duration of the continuous function.
