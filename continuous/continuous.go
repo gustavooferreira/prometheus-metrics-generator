@@ -3,12 +3,19 @@ package continuous
 import (
 	"time"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
+
+// startTime represents the time at which the function started being evaluated.
+// a given iterator might not return any sample if too long has passed since the startTime.
+type DataGenerator interface {
+	Iterator(startTime time.Time) DataIterator
+	// Describe() DataSpec
+}
 
 // DataIterator defines the interface a continuous data iterator needs to comply with.
 type DataIterator interface {
-	Evaluate(scrapeInfo ScrapeInfo) series.ScrapeResult
+	Evaluate(scrapeInfo ScrapeInfo) metrics.ScrapeResult
 	Duration() time.Duration
 }
 

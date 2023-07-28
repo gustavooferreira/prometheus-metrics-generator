@@ -1,4 +1,4 @@
-package series_test
+package metrics_test
 
 import (
 	"testing"
@@ -7,13 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 func TestScraper(t *testing.T) {
 	t.Run("should return a scraper that runs forever", func(t *testing.T) {
-		scraper, err := series.NewScraper(
-			series.ScraperConfig{
+		scraper, err := metrics.NewScraper(
+			metrics.ScraperConfig{
 				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 				ScrapeInterval: 15 * time.Second,
 			},
@@ -23,8 +23,8 @@ func TestScraper(t *testing.T) {
 	})
 
 	t.Run("should generate a big number of scrapes given that there is no stop condition", func(t *testing.T) {
-		scraper, err := series.NewScraper(
-			series.ScraperConfig{
+		scraper, err := metrics.NewScraper(
+			metrics.ScraperConfig{
 				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 				ScrapeInterval: 15 * time.Second,
 			},
@@ -49,16 +49,16 @@ func TestScraper(t *testing.T) {
 	})
 
 	t.Run("should produce the right amount of scrapes given the presence of endTime", func(t *testing.T) {
-		scraper, err := series.NewScraper(
-			series.ScraperConfig{
+		scraper, err := metrics.NewScraper(
+			metrics.ScraperConfig{
 				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 				ScrapeInterval: 15 * time.Second,
 			},
-			series.WithScraperEndTime(time.Date(2023, 1, 1, 10, 31, 0, 0, time.UTC)),
+			metrics.WithScraperEndTime(time.Date(2023, 1, 1, 10, 31, 0, 0, time.UTC)),
 		)
 		require.NoError(t, err)
 
-		var scrapeInfoArr []series.ScrapeInfo
+		var scrapeInfoArr []metrics.ScrapeInfo
 
 		for iter := scraper.Iterator(); iter.HasNext(); {
 			scrapeInfo := iter.Next()
@@ -73,27 +73,27 @@ func TestScraper(t *testing.T) {
 		}
 
 		require.Equal(t, 5, len(scrapeInfoArr))
-		assert.Equal(t, series.ScrapeInfo{
+		assert.Equal(t, metrics.ScrapeInfo{
 			FirstIterationTime: time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			IterationCount:     0,
 			IterationTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 		}, scrapeInfoArr[0])
-		assert.Equal(t, series.ScrapeInfo{
+		assert.Equal(t, metrics.ScrapeInfo{
 			FirstIterationTime: time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			IterationCount:     1,
 			IterationTime:      time.Date(2023, 1, 1, 10, 30, 15, 0, time.UTC),
 		}, scrapeInfoArr[1])
-		assert.Equal(t, series.ScrapeInfo{
+		assert.Equal(t, metrics.ScrapeInfo{
 			FirstIterationTime: time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			IterationCount:     2,
 			IterationTime:      time.Date(2023, 1, 1, 10, 30, 30, 0, time.UTC),
 		}, scrapeInfoArr[2])
-		assert.Equal(t, series.ScrapeInfo{
+		assert.Equal(t, metrics.ScrapeInfo{
 			FirstIterationTime: time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			IterationCount:     3,
 			IterationTime:      time.Date(2023, 1, 1, 10, 30, 45, 0, time.UTC),
 		}, scrapeInfoArr[3])
-		assert.Equal(t, series.ScrapeInfo{
+		assert.Equal(t, metrics.ScrapeInfo{
 			FirstIterationTime: time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 			IterationCount:     4,
 			IterationTime:      time.Date(2023, 1, 1, 10, 31, 0, 0, time.UTC),
@@ -101,18 +101,18 @@ func TestScraper(t *testing.T) {
 	})
 
 	t.Run("should be able to go over the iterator twice given that we reset the iterator", func(t *testing.T) {
-		scraper, err := series.NewScraper(
-			series.ScraperConfig{
+		scraper, err := metrics.NewScraper(
+			metrics.ScraperConfig{
 				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
 				ScrapeInterval: 15 * time.Second,
 			},
-			series.WithScraperEndTime(time.Date(2023, 1, 1, 10, 31, 0, 0, time.UTC)),
+			metrics.WithScraperEndTime(time.Date(2023, 1, 1, 10, 31, 0, 0, time.UTC)),
 		)
 		require.NoError(t, err)
 
 		iter := scraper.Iterator()
 
-		var scrapeInfoArr1 []series.ScrapeInfo
+		var scrapeInfoArr1 []metrics.ScrapeInfo
 		for iter.HasNext() {
 			scrapeInfo := iter.Next()
 			scrapeInfoArr1 = append(scrapeInfoArr1, scrapeInfo)
@@ -120,7 +120,7 @@ func TestScraper(t *testing.T) {
 
 		iter.Reset()
 
-		var scrapeInfoArr2 []series.ScrapeInfo
+		var scrapeInfoArr2 []metrics.ScrapeInfo
 		for iter.HasNext() {
 			scrapeInfo := iter.Next()
 			scrapeInfoArr2 = append(scrapeInfoArr2, scrapeInfo)

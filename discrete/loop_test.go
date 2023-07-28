@@ -6,19 +6,19 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/gustavooferreira/prometheus-metrics-generator/datafuncs/discrete"
+	discrete2 "github.com/gustavooferreira/prometheus-metrics-generator/discrete"
 )
 
 func TestLoopDataIterator(t *testing.T) {
 	t.Run("should not return any sample when count is zero", func(t *testing.T) {
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete2.NewLinearSegment(discrete2.LinearSegmentOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 2,
 		})
 		require.NoError(t, err)
 
-		dataGenerator := discrete.Loop(lsDataGenerator, 0)
+		dataGenerator := discrete2.Loop(lsDataGenerator, 0)
 
 		results := helperScraper(t, dataGenerator.Iterator())
 
@@ -26,14 +26,14 @@ func TestLoopDataIterator(t *testing.T) {
 	})
 
 	t.Run("should not return any sample when count is negative", func(t *testing.T) {
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete2.NewLinearSegment(discrete2.LinearSegmentOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 2,
 		})
 		require.NoError(t, err)
 
-		dataGenerator := discrete.Loop(lsDataGenerator, -5)
+		dataGenerator := discrete2.Loop(lsDataGenerator, -5)
 
 		results := helperScraper(t, dataGenerator.Iterator())
 
@@ -41,14 +41,14 @@ func TestLoopDataIterator(t *testing.T) {
 	})
 
 	t.Run("should produce valid results for the given data generator and count", func(t *testing.T) {
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete2.NewLinearSegment(discrete2.LinearSegmentOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 2,
 		})
 		require.NoError(t, err)
 
-		dataGenerator := discrete.Loop(lsDataGenerator, 3)
+		dataGenerator := discrete2.Loop(lsDataGenerator, 3)
 
 		results := helperScraper(t, dataGenerator.Iterator())
 

@@ -1,7 +1,7 @@
 package discrete
 
 import (
-	"github.com/gustavooferreira/prometheus-metrics-generator/series"
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 // Check at compile time whether VoidDataGenerator implements DataGenerator interface.
@@ -20,7 +20,7 @@ func Void(count int) *VoidDataGenerator {
 	}
 }
 
-func (vdg *VoidDataGenerator) Iterator() DataIterator {
+func (vdg *VoidDataGenerator) Iterator() metrics.DataIterator {
 	return &VoidDataIterator{
 		voidDataGenerator: *vdg,
 	}
@@ -32,8 +32,8 @@ func (vdg *VoidDataGenerator) Describe() DataSpec {
 	}
 }
 
-// Check at compile time whether VoidDataIterator implements DataIterator interface.
-var _ DataIterator = (*VoidDataIterator)(nil)
+// Check at compile time whether VoidDataIterator implements metrics.DataIterator interface.
+var _ metrics.DataIterator = (*VoidDataIterator)(nil)
 
 type VoidDataIterator struct {
 	voidDataGenerator VoidDataGenerator
@@ -42,13 +42,13 @@ type VoidDataIterator struct {
 	dataGeneratorVoidCount int
 }
 
-// Iterate fulfills the DataIterator interface.
+// Evaluate fulfills the metrics.DataIterator interface.
 // This function is responsible for returning the data points one at a time.
-func (vdi *VoidDataIterator) Iterate(scrapeInfo series.ScrapeInfo) series.ScrapeResult {
+func (vdi *VoidDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
 	for vdi.dataGeneratorVoidCount < vdi.voidDataGenerator.count {
 		vdi.dataGeneratorVoidCount++
-		return series.ScrapeResult{Missing: true}
+		return metrics.ScrapeResult{Missing: true}
 	}
 
-	return series.ScrapeResult{Exhausted: true}
+	return metrics.ScrapeResult{Exhausted: true}
 }

@@ -1,11 +1,11 @@
-package series
+package metrics
 
 import (
 	"fmt"
 	"time"
 )
 
-// Scraper generates scrape that are then passed into a TimeSeries Iterator to generate the time series values.
+// Scraper generates scrapes that are then passed into a DataIterator to generate the time series values.
 // This can be used to generate metrics that can then be pushed to prometheus using the remote writer.
 // It can also be useful for testing purposes.
 // The generated scrapes are precise and do not include any jitter.
@@ -59,7 +59,7 @@ func (s *Scraper) Scrape(dataIterator DataIterator, scrapeHandler ScrapeHandler)
 	for iter := s.Iterator(); iter.HasNext(); {
 		scrapeInfo := iter.Next()
 
-		scrapeResult := dataIterator.Iterate(scrapeInfo)
+		scrapeResult := dataIterator.Evaluate(scrapeInfo)
 		if scrapeResult.Exhausted {
 			// exhausted time series
 			return nil
