@@ -23,7 +23,7 @@ var _ DataGenerator = (*LinearSegmentDataGenerator)(nil)
 
 // LinearSegmentDataGenerator returns a DataGenerator representing a linear segment.
 // A linear segment can be horizontal or have a positive or negative slope.
-// Linear segments can be put together, with the help of the NewJoinDataGenerator DataGenerator to form more complex structures.
+// Linear segments can be put together, with the help of the JoinDataGenerator to form more complex structures.
 // Note that it's an error to use a linear segment containing negative values with counters. It's the user's
 // responsibility to make sure negative numbers only appear in gauges.
 // The zero value is not useful.
