@@ -13,12 +13,24 @@ import (
 func helperScraper(t *testing.T, dataIterator metrics.DataIterator) []resultContainer {
 	t.Helper()
 
+	return helperScraperCustom(
+		t,
+		time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
+		15*time.Second,
+		100,
+		dataIterator,
+	)
+}
+
+func helperScraperCustom(t *testing.T, startTime time.Time, scrapeInterval time.Duration, scrapeCountLimit int, dataIterator metrics.DataIterator) []resultContainer {
+	t.Helper()
+
 	scraper, err := metrics.NewScraper(
 		metrics.ScraperConfig{
-			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
-			ScrapeInterval: 15 * time.Second,
+			StartTime:      startTime,
+			ScrapeInterval: scrapeInterval,
 		},
-		metrics.WithScraperIterationCountLimit(100), // It's good practice to set an upper bound in tests
+		metrics.WithScraperIterationCountLimit(scrapeCountLimit), // It's good practice to set an upper bound in tests
 	)
 	require.NoError(t, err)
 
