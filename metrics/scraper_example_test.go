@@ -20,7 +20,7 @@ func ExampleScraper() {
 		panic(err)
 	}
 
-	lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+	lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 		AmplitudeStart:      50,
 		AmplitudeEnd:        70,
 		IterationCountLimit: 5,

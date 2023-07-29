@@ -11,14 +11,14 @@ import (
 
 func TestLoopDataIterator(t *testing.T) {
 	t.Run("should not return any sample when count is zero", func(t *testing.T) {
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 2,
 		})
 		require.NoError(t, err)
 
-		dataGenerator := discrete.Loop(lsDataGenerator, 0)
+		dataGenerator := discrete.NewLoopDataGenerator(lsDataGenerator, 0)
 
 		results := helperScraper(t, dataGenerator.Iterator())
 
@@ -26,14 +26,14 @@ func TestLoopDataIterator(t *testing.T) {
 	})
 
 	t.Run("should not return any sample when count is negative", func(t *testing.T) {
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 2,
 		})
 		require.NoError(t, err)
 
-		dataGenerator := discrete.Loop(lsDataGenerator, -5)
+		dataGenerator := discrete.NewLoopDataGenerator(lsDataGenerator, -5)
 
 		results := helperScraper(t, dataGenerator.Iterator())
 
@@ -41,14 +41,14 @@ func TestLoopDataIterator(t *testing.T) {
 	})
 
 	t.Run("should produce valid results for the given data generator and count", func(t *testing.T) {
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 2,
 		})
 		require.NoError(t, err)
 
-		dataGenerator := discrete.Loop(lsDataGenerator, 3)
+		dataGenerator := discrete.NewLoopDataGenerator(lsDataGenerator, 3)
 
 		results := helperScraper(t, dataGenerator.Iterator())
 

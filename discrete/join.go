@@ -11,8 +11,8 @@ type JoinDataGenerator struct {
 	dataGenerators []DataGenerator
 }
 
-// Join joins all DataGenerators, one after the next.
-func Join(dataGenerators []DataGenerator) *JoinDataGenerator {
+// NewJoinDataGenerator joins all DataGenerators, one after the next.
+func NewJoinDataGenerator(dataGenerators []DataGenerator) *JoinDataGenerator {
 	return &JoinDataGenerator{
 		dataGenerators: dataGenerators,
 	}
@@ -70,7 +70,7 @@ func (jdi *JoinDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.Scr
 // Check at compile time whether JoinDataSpec implements DataSpec interface.
 var _ DataSpec = (*JoinDataSpec)(nil)
 
-// JoinDataSpec implements a generic DataSpec for the Join container.
+// JoinDataSpec implements a generic DataSpec for the JoinDataGenerator container.
 type JoinDataSpec struct {
 	Children []DataSpec
 }

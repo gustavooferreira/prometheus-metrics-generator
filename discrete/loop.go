@@ -12,8 +12,8 @@ type LoopDataGenerator struct {
 	count         int
 }
 
-// Loop loops over the DataGenerator N times.
-func Loop(dataGenerator DataGenerator, count int) *LoopDataGenerator {
+// NewLoopDataGenerator loops over the DataGenerator N times.
+func NewLoopDataGenerator(dataGenerator DataGenerator, count int) *LoopDataGenerator {
 	return &LoopDataGenerator{
 		dataGenerator: dataGenerator,
 		count:         count,
@@ -67,7 +67,7 @@ func (ldi *LoopDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.Scr
 // Check at compile time whether LoopDataSpec implements DataSpec interface.
 var _ DataSpec = (*LoopDataSpec)(nil)
 
-// LoopDataSpec implements a generic DataSpec for the Loop container.
+// LoopDataSpec implements a generic DataSpec for the LoopDataGenerator container.
 type LoopDataSpec struct {
 	Count int
 	Func  DataSpec

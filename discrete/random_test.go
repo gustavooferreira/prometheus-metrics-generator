@@ -11,7 +11,7 @@ import (
 
 func TestRandomDataIterator(t *testing.T) {
 	t.Run("should fail given that iteration count limit is set to zero", func(t *testing.T) {
-		_, err := discrete.NewRandom(discrete.RandomOptions{
+		_, err := discrete.NewRandomDataGenerator(discrete.RandomDataGeneratorOptions{
 			AmplitudeMin: 11,
 			AmplitudeMax: 20,
 		})
@@ -21,7 +21,7 @@ func TestRandomDataIterator(t *testing.T) {
 	})
 
 	t.Run("should produce valid results for the given count", func(t *testing.T) {
-		dataGenerator, err := discrete.NewRandom(discrete.RandomOptions{
+		dataGenerator, err := discrete.NewRandomDataGenerator(discrete.RandomDataGeneratorOptions{
 			AmplitudeMin:        11,
 			AmplitudeMax:        20,
 			IterationCountLimit: 10,

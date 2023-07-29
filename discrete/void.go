@@ -13,8 +13,8 @@ type VoidDataGenerator struct {
 	count int
 }
 
-// Void voids over the DataGenerator N times.
-func Void(count int) *VoidDataGenerator {
+// NewVoidDataGenerator returns a DataGenerator representing a void segment.
+func NewVoidDataGenerator(count int) *VoidDataGenerator {
 	return &VoidDataGenerator{
 		count: count,
 	}
@@ -38,15 +38,15 @@ var _ metrics.DataIterator = (*VoidDataIterator)(nil)
 type VoidDataIterator struct {
 	voidDataGenerator VoidDataGenerator
 
-	// these variables keep track of the current state of the iterator
-	dataGeneratorVoidCount int
+	// iterCount represents the cycle the iterator is in
+	iterCount int
 }
 
 // Evaluate fulfills the metrics.DataIterator interface.
 // This function is responsible for returning the data points one at a time.
 func (vdi *VoidDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
-	for vdi.dataGeneratorVoidCount < vdi.voidDataGenerator.count {
-		vdi.dataGeneratorVoidCount++
+	for vdi.iterCount < vdi.voidDataGenerator.count {
+		vdi.iterCount++
 		return metrics.ScrapeResult{Missing: true}
 	}
 
