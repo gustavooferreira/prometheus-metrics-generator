@@ -29,7 +29,7 @@ func (ldg *LoopDataGenerator) Iterator() metrics.DataIterator {
 func (ldg *LoopDataGenerator) Describe() DataSpec {
 	return LoopDataSpec{
 		Count: ldg.count,
-		Func:  ldg.Describe(),
+		Func:  ldg.dataGenerator.Describe(),
 	}
 }
 
