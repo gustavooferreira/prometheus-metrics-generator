@@ -1,0 +1,107 @@
+package discrete
+
+import (
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
+)
+
+// Check at compile time whether CounterTimeSeries implements metrics.TimeSeries interface.
+var _ metrics.TimeSeries = (*CounterTimeSeries)(nil)
+
+// CounterTimeSeries represents a counter time series.
+// When the time series iterator gets to the end of the DataGenerator provided it will evaluate the metrics.EndStrategy
+// to decide on what to do next.
+// The zero value of CounterTimeSeries is not useful. Use NewCounterTimeSeries function.
+type CounterTimeSeries struct {
+	info metrics.TimeSeriesInfo
+
+	dataGenerator DataGenerator
+	endStrategy   metrics.EndStrategy
+}
+
+// NewCounterTimeSeries returns a new discrete counter time series.
+func NewCounterTimeSeries(seriesName string, labels map[string]string, data DataGenerator, endStrategy metrics.EndStrategy) CounterTimeSeries {
+	return CounterTimeSeries{
+		info: metrics.TimeSeriesInfo{
+			Type:   metrics.TimeSeriesTypeCounter,
+			Name:   seriesName,
+			Labels: labels,
+		},
+		dataGenerator: data,
+		endStrategy:   endStrategy,
+	}
+}
+
+func (ts *CounterTimeSeries) Iterator() metrics.DataIterator {
+	return &CounterTimeSeriesDataIterator{
+		timeseries: *ts,
+		state:      metrics.TimeSeriesIteratorStateRunning,
+	}
+}
+
+func (ts *CounterTimeSeries) Info() metrics.TimeSeriesInfo {
+	return ts.info
+}
+
+// Check at compile time whether CounterTimeSeriesDataIterator implements metrics.DataIterator interface.
+var _ metrics.DataIterator = (*CounterTimeSeriesDataIterator)(nil)
+
+type CounterTimeSeriesDataIterator struct {
+	timeseries CounterTimeSeries
+
+	// dataIterator contains the DataIterator for the current run
+	dataIterator metrics.DataIterator
+
+	// Reports whether we are evaluating data or we are in the end strategy stage
+	state metrics.TimeSeriesIteratorState
+
+	// loopCount keeps track of how many times we've looped over the DataGenerator
+	// For example, if loopCount is 1, it means we've cycled through the iterator once and may be in the middle of
+	// cycling through the iterator for a second time.
+	loopCount int
+
+	// lastValue represents the last value returned by the DataIterator
+	lastValue metrics.ScrapeResult
+}
+
+// Evaluate fulfills the metrics.DataIterator interface.
+// This function is responsible for returning the data points one at a time.
+func (di *CounterTimeSeriesDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
+	// Need the loop as when we reach the end of the iterator, regardless of what the end strategy is, we need to
+	// evaluate the logic again, after setting the iterator state.
+	for {
+		if di.state == metrics.TimeSeriesIteratorStateEndStrategy {
+			switch di.timeseries.endStrategy.EndStrategyType {
+			case metrics.EndStrategyTypeLoop:
+				di.dataIterator = nil
+				di.loopCount++
+				di.state = metrics.TimeSeriesIteratorStateRunning
+				continue // it would be safe to let the logic run through as well
+			case metrics.EndStrategyTypeSendLastValue:
+				return di.lastValue
+			case metrics.EndStrategyTypeSendCustomValue:
+				return di.timeseries.endStrategy.CustomValue()
+			case metrics.EndStrategyTypeRemoveTimeSeries:
+				return metrics.ScrapeResult{Exhausted: true}
+			default:
+				// if the end strategy hasn't been set somehow, default to removing time series
+				return metrics.ScrapeResult{Exhausted: true}
+			}
+		}
+
+		// if we don't have an iterator, get one
+		if di.dataIterator == nil {
+			di.dataIterator = di.timeseries.dataGenerator.Iterator()
+		}
+
+		result := di.dataIterator.Evaluate(scrapeInfo)
+
+		// We reached the end of the iterator
+		if result.Exhausted {
+			di.state = metrics.TimeSeriesIteratorStateEndStrategy
+			continue
+		}
+
+		di.lastValue = result
+		return result
+	}
+}
