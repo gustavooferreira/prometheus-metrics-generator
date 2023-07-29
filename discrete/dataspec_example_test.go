@@ -7,7 +7,7 @@ import (
 )
 
 func ExampleDataSpec() {
-	lsDataGenerator1, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+	lsDataGenerator1, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 		AmplitudeStart:      50,
 		AmplitudeEnd:        70,
 		IterationCountLimit: 5,
@@ -16,7 +16,7 @@ func ExampleDataSpec() {
 		panic(err)
 	}
 
-	lsDataGenerator2, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+	lsDataGenerator2, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 		AmplitudeStart:      50,
 		AmplitudeEnd:        70,
 		IterationCountLimit: 5,
@@ -25,9 +25,9 @@ func ExampleDataSpec() {
 		panic(err)
 	}
 
-	lsDataGenerator2a := discrete.Loop(lsDataGenerator2, 3)
+	lsDataGenerator2a := discrete.NewLoopDataGenerator(lsDataGenerator2, 3)
 
-	dataGenerator := discrete.Join([]discrete.DataGenerator{lsDataGenerator1, lsDataGenerator2a})
+	dataGenerator := discrete.NewJoinDataGenerator([]discrete.DataGenerator{lsDataGenerator1, lsDataGenerator2a})
 
 	rootDataSpec := dataGenerator.Describe()
 	result := discrete.Describe(rootDataSpec)

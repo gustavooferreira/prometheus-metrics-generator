@@ -19,7 +19,7 @@ func TestScraperConfig(t *testing.T) {
 
 		err := scraperConfig.Validate()
 		require.Error(t, err)
-		expectedErrorMessage := "scrape interval cannot be less or equal to zero"
+		expectedErrorMessage := "scrape interval cannot be less than or equal to zero"
 		assert.Equal(t, expectedErrorMessage, err.Error())
 	})
 

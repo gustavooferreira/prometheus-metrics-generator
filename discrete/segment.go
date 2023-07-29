@@ -6,8 +6,8 @@ import (
 	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
-// LinearSegmentOptions contains the options for the LinearSegment.
-type LinearSegmentOptions struct {
+// LinearSegmentDataGeneratorOptions contains the options for the LinearSegmentDataGenerator.
+type LinearSegmentDataGeneratorOptions struct {
 	// AmplitudeStart represents the initial value for the segment.
 	AmplitudeStart float64
 
@@ -18,55 +18,55 @@ type LinearSegmentOptions struct {
 	IterationCountLimit int
 }
 
-// Check at compile time whether LinearSegment implements DataGenerator interface.
-var _ DataGenerator = (*LinearSegment)(nil)
+// Check at compile time whether LinearSegmentDataGenerator implements DataGenerator interface.
+var _ DataGenerator = (*LinearSegmentDataGenerator)(nil)
 
-// LinearSegment returns a DataGenerator representing a linear segment.
+// LinearSegmentDataGenerator returns a DataGenerator representing a linear segment.
 // A linear segment can be horizontal or have a positive or negative slope.
-// Linear segments can be put together, with the help of the Join DataGenerator to form more complex structures.
+// Linear segments can be put together, with the help of the JoinDataGenerator to form more complex structures.
 // Note that it's an error to use a linear segment containing negative values with counters. It's the user's
 // responsibility to make sure negative numbers only appear in gauges.
 // The zero value is not useful.
-type LinearSegment struct {
-	options LinearSegmentOptions
+type LinearSegmentDataGenerator struct {
+	options LinearSegmentDataGeneratorOptions
 }
 
-// NewLinearSegment returns a new instance of LinearSegment.
-func NewLinearSegment(options LinearSegmentOptions) (*LinearSegment, error) {
+// NewLinearSegmentDataGenerator returns a new instance of LinearSegmentDataGenerator.
+func NewLinearSegmentDataGenerator(options LinearSegmentDataGeneratorOptions) (*LinearSegmentDataGenerator, error) {
 	if options.IterationCountLimit <= 0 {
-		return &LinearSegment{}, fmt.Errorf("iteration count limit cannot be less than or equal to zero")
+		return &LinearSegmentDataGenerator{}, fmt.Errorf("iteration count limit cannot be less than or equal to zero")
 	}
 
-	return &LinearSegment{
+	return &LinearSegmentDataGenerator{
 		options: options,
 	}, nil
 }
 
-func (ls *LinearSegment) Iterator() metrics.DataIterator {
+func (ls *LinearSegmentDataGenerator) Iterator() metrics.DataIterator {
 	slope := 0.0
 	if ls.options.IterationCountLimit >= 2 {
 		slope = (ls.options.AmplitudeEnd - ls.options.AmplitudeStart) / float64(ls.options.IterationCountLimit-1)
 	}
 
-	return &LinearSegmentIterator{
-		linearSegment: *ls,
-		slope:         slope,
+	return &LinearSegmentDataIterator{
+		linearSegmentDataGenerator: *ls,
+		slope:                      slope,
 	}
 }
 
-func (ls *LinearSegment) Describe() DataSpec {
+func (ls *LinearSegmentDataGenerator) Describe() DataSpec {
 	return DataNodeDataSpec{
 		name: "Linear Segment",
 	}
 }
 
-// Check at compile time whether LinearSegmentIterator implements metrics.DataIterator interface.
-var _ metrics.DataIterator = (*LinearSegmentIterator)(nil)
+// Check at compile time whether LinearSegmentDataIterator implements metrics.DataIterator interface.
+var _ metrics.DataIterator = (*LinearSegmentDataIterator)(nil)
 
-type LinearSegmentIterator struct {
+type LinearSegmentDataIterator struct {
 	// read-only access
-	linearSegment LinearSegment
-	slope         float64
+	linearSegmentDataGenerator LinearSegmentDataGenerator
+	slope                      float64
 
 	// iterCount represents the cycle the iterator is in
 	iterCount int
@@ -74,9 +74,9 @@ type LinearSegmentIterator struct {
 
 // Evaluate fulfills the metrics.DataIterator interface.
 // This function is responsible for returning the data points one at a time.
-func (lsi *LinearSegmentIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
+func (lsi *LinearSegmentDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
 	// Have we reached the end?
-	if lsi.iterCount >= lsi.linearSegment.options.IterationCountLimit {
+	if lsi.iterCount >= lsi.linearSegmentDataGenerator.options.IterationCountLimit {
 		return metrics.ScrapeResult{Exhausted: true}
 	}
 
@@ -84,10 +84,10 @@ func (lsi *LinearSegmentIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metric
 	defer func() { lsi.iterCount++ }()
 
 	// If we have a horizontal line, there is no need to do any computation
-	if lsi.linearSegment.options.AmplitudeStart == lsi.linearSegment.options.AmplitudeEnd {
-		return metrics.ScrapeResult{Value: lsi.linearSegment.options.AmplitudeStart}
+	if lsi.linearSegmentDataGenerator.options.AmplitudeStart == lsi.linearSegmentDataGenerator.options.AmplitudeEnd {
+		return metrics.ScrapeResult{Value: lsi.linearSegmentDataGenerator.options.AmplitudeStart}
 	}
 
-	value := lsi.linearSegment.options.AmplitudeStart + lsi.slope*float64(lsi.iterCount)
+	value := lsi.linearSegmentDataGenerator.options.AmplitudeStart + lsi.slope*float64(lsi.iterCount)
 	return metrics.ScrapeResult{Value: value}
 }

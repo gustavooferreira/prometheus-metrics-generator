@@ -13,7 +13,7 @@ import (
 
 func TestLinearSegmentDataIterator(t *testing.T) {
 	t.Run("should fail given that iteration count limit is set to zero", func(t *testing.T) {
-		_, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		_, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart: 11,
 			AmplitudeEnd:   20,
 		})
@@ -23,7 +23,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 	})
 
 	t.Run("should produce valid results for the given iteration count limit", func(t *testing.T) {
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 10,
@@ -38,7 +38,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 	})
 
 	t.Run("should produce valid results for an iteration count limit of 1", func(t *testing.T) {
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 1,
@@ -52,7 +52,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 	})
 
 	t.Run("should produce valid results for an iteration count limit of 2", func(t *testing.T) {
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 2,
@@ -67,7 +67,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 	})
 
 	t.Run("should produce valid results for a horizontal line", func(t *testing.T) {
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      50,
 			AmplitudeEnd:        50,
 			IterationCountLimit: 7,
@@ -91,7 +91,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      20,
 			AmplitudeEnd:        40,
 			IterationCountLimit: 9,

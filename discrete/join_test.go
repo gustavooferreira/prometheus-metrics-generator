@@ -11,7 +11,7 @@ import (
 
 func TestJoinDataIterator(t *testing.T) {
 	t.Run("should not return any sample when no data iterators are provided", func(t *testing.T) {
-		dataGenerator := discrete.Join([]discrete.DataGenerator{})
+		dataGenerator := discrete.NewJoinDataGenerator([]discrete.DataGenerator{})
 
 		results := helperScraper(t, dataGenerator.Iterator())
 
@@ -21,7 +21,7 @@ func TestJoinDataIterator(t *testing.T) {
 	t.Run("should produce valid results for the given list of data iterators", func(t *testing.T) {
 		var dataGeneratorsArray []discrete.DataGenerator
 
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 2,
@@ -29,7 +29,7 @@ func TestJoinDataIterator(t *testing.T) {
 		require.NoError(t, err)
 		dataGeneratorsArray = append(dataGeneratorsArray, lsDataGenerator)
 
-		lsDataGenerator, err = discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err = discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      40,
 			AmplitudeEnd:        50,
 			IterationCountLimit: 3,
@@ -37,7 +37,7 @@ func TestJoinDataIterator(t *testing.T) {
 		require.NoError(t, err)
 		dataGeneratorsArray = append(dataGeneratorsArray, lsDataGenerator)
 
-		lsDataGenerator, err = discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err = discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      70,
 			AmplitudeEnd:        70,
 			IterationCountLimit: 4,
@@ -45,7 +45,7 @@ func TestJoinDataIterator(t *testing.T) {
 		require.NoError(t, err)
 		dataGeneratorsArray = append(dataGeneratorsArray, lsDataGenerator)
 
-		dataGenerator := discrete.Join(dataGeneratorsArray)
+		dataGenerator := discrete.NewJoinDataGenerator(dataGeneratorsArray)
 
 		results := helperScraper(t, dataGenerator.Iterator())
 
@@ -64,7 +64,7 @@ func TestJoinDataIterator(t *testing.T) {
 	t.Run("should produce valid results when joining the same data generator multiple times", func(t *testing.T) {
 		var dataGeneratorsArray []discrete.DataGenerator
 
-		lsDataGenerator, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 2,
@@ -74,7 +74,7 @@ func TestJoinDataIterator(t *testing.T) {
 		dataGeneratorsArray = append(dataGeneratorsArray, lsDataGenerator)
 		dataGeneratorsArray = append(dataGeneratorsArray, lsDataGenerator)
 
-		dataGenerator := discrete.Join(dataGeneratorsArray)
+		dataGenerator := discrete.NewJoinDataGenerator(dataGeneratorsArray)
 
 		results := helperScraper(t, dataGenerator.Iterator())
 
@@ -88,14 +88,14 @@ func TestJoinDataIterator(t *testing.T) {
 	})
 
 	t.Run("should produce valid results for the given list of data iterators, join other joins", func(t *testing.T) {
-		lsDataGenerator1, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator1, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      10,
 			AmplitudeEnd:        20,
 			IterationCountLimit: 2,
 		})
 		require.NoError(t, err)
 
-		lsDataGenerator2, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator2, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      40,
 			AmplitudeEnd:        50,
 			IterationCountLimit: 3,
@@ -103,16 +103,16 @@ func TestJoinDataIterator(t *testing.T) {
 		require.NoError(t, err)
 
 		join1 := []discrete.DataGenerator{lsDataGenerator1, lsDataGenerator2}
-		dataGeneratorJoin1 := discrete.Join(join1)
+		dataGeneratorJoin1 := discrete.NewJoinDataGenerator(join1)
 
-		lsDataGenerator3, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator3, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      70,
 			AmplitudeEnd:        70,
 			IterationCountLimit: 4,
 		})
 		require.NoError(t, err)
 
-		lsDataGenerator4, err := discrete.NewLinearSegment(discrete.LinearSegmentOptions{
+		lsDataGenerator4, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      60,
 			AmplitudeEnd:        30,
 			IterationCountLimit: 4,
@@ -120,12 +120,12 @@ func TestJoinDataIterator(t *testing.T) {
 		require.NoError(t, err)
 
 		join2 := []discrete.DataGenerator{lsDataGenerator3, lsDataGenerator4}
-		dataGeneratorJoin2 := discrete.Join(join2)
+		dataGeneratorJoin2 := discrete.NewJoinDataGenerator(join2)
 
 		// ------------
 
 		greaterJoin := []discrete.DataGenerator{dataGeneratorJoin1, dataGeneratorJoin2}
-		dataGenerator := discrete.Join(greaterJoin)
+		dataGenerator := discrete.NewJoinDataGenerator(greaterJoin)
 
 		results := helperScraper(t, dataGenerator.Iterator())
 
