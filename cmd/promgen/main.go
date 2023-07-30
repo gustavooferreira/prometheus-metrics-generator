@@ -11,8 +11,8 @@ import (
 	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
-// This is a CLI tool that reads the timeseries from a yaml file.
-// It can serve as a http server exposing the metrics or write to prometheus using remote write.
+// This is a CLI tool that reads metrics/timeseries from a yaml file.
+// It can serve them with a http server exposing the metrics or write to prometheus using remote write.
 func main() {
 	fmt.Println("Running prometheus metrics generator server")
 
@@ -30,7 +30,7 @@ func main() {
 	timeSeries := discrete.NewMetricTimeSeries(
 		map[string]string{"label1": "value1"},
 		dataGenerator,
-		metrics.NewEndStrategyRemoveTimeSeries(),
+		metrics.NewEndStrategyLoop(),
 	)
 
 	metric := metrics.NewMetric("my_metric", "my metric help", metrics.MetricTypeGauge, []string{"label1"})
