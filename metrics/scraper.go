@@ -49,13 +49,12 @@ func (s *Scraper) Iterator() ScraperIterator {
 	}
 }
 
-// Scrape scrapes the DataIterator according to the settings of the Scraper.
+// ScrapeDataIterator scrapes the DataIterator according to the settings of the Scraper.
 // This function can be used as an alternative to creating an iterator and manually iterate over the scrapes.
 // For each generated scrape, this function will call the ScrapeHandler provided.
 // This function terminates when the DataIterator has no more data left, or there are no more scrapes to be generated,
 // or the ScrapeHandler returns an error.
-// TODO: This function only works with discrete data functions. Do we want to remove it?
-func (s *Scraper) Scrape(dataIterator DataIterator, scrapeHandler ScrapeHandler) error {
+func (s *Scraper) ScrapeDataIterator(dataIterator DataIterator, scrapeHandler ScrapeHandler) error {
 	for iter := s.Iterator(); iter.HasNext(); {
 		scrapeInfo := iter.Next()
 
@@ -75,9 +74,9 @@ func (s *Scraper) Scrape(dataIterator DataIterator, scrapeHandler ScrapeHandler)
 	return nil
 }
 
-// ScrapeHandler defines the function type to be used when calling the Scrape method of the Scraper.
-// Return an error to stop the scrapping from proceeding any further. The Scrape method will wrap the returned error and
-// return it.
+// ScrapeHandler defines the function type to be used when calling the ScrapeDataIterator method of the Scraper.
+// Return an error to stop the scrapping from proceeding any further. The ScrapeDataIterator method will wrap the
+// returned error and return it.
 // The field 'Exhausted' in the struct ScrapeResult will never be set, since if the scraper has exhausted the
 // DataIterator it will automatically stop.
 type ScrapeHandler func(scrapeInfo ScrapeInfo, scrapeResult ScrapeResult) error

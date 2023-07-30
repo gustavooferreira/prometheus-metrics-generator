@@ -38,7 +38,7 @@ func ExampleScraper() {
 		return nil
 	}
 
-	err = scraper.Scrape(lsDataGenerator.Iterator(), scrapeHandler)
+	err = scraper.ScrapeDataIterator(lsDataGenerator.Iterator(), scrapeHandler)
 	if err != nil {
 		panic(err)
 	}

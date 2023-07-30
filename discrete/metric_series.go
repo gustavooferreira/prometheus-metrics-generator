@@ -7,7 +7,7 @@ import (
 // Check at compile time whether MetricTimeSeries implements metrics.MetricTimeSeriesObservable interface.
 var _ metrics.MetricTimeSeriesObservable = (*MetricTimeSeries)(nil)
 
-// MetricTimeSeries represents a counter time series.
+// MetricTimeSeries represents a metric time series (counter or gauge).
 // When the time series iterator gets to the end of the DataGenerator provided it will evaluate the metrics.EndStrategy
 // to decide on what to do next.
 // The zero value of MetricTimeSeries is not useful. Use NewMetricTimeSeries function.
@@ -19,8 +19,8 @@ type MetricTimeSeries struct {
 }
 
 // NewMetricTimeSeries returns a new discrete counter time series.
-func NewMetricTimeSeries(labels map[string]string, data DataGenerator, endStrategy metrics.EndStrategy) MetricTimeSeries {
-	return MetricTimeSeries{
+func NewMetricTimeSeries(labels map[string]string, data DataGenerator, endStrategy metrics.EndStrategy) *MetricTimeSeries {
+	return &MetricTimeSeries{
 		labels:        labels,
 		dataGenerator: data,
 		endStrategy:   endStrategy,
@@ -29,20 +29,21 @@ func NewMetricTimeSeries(labels map[string]string, data DataGenerator, endStrate
 
 // Iterator returns a time series iterator that can be used to iterate over the data.
 func (ts *MetricTimeSeries) Iterator() metrics.DataIterator {
-	return &CounterTimeSeriesDataIterator{
+	return &MetricTimeSeriesDataIterator{
 		timeseries: *ts,
 		state:      metrics.TimeSeriesIteratorStateRunning,
 	}
 }
 
+// Labels returns the labels associated with the time series.
 func (ts *MetricTimeSeries) Labels() map[string]string {
 	return ts.labels
 }
 
-// Check at compile time whether CounterTimeSeriesDataIterator implements metrics.DataIterator interface.
-var _ metrics.DataIterator = (*CounterTimeSeriesDataIterator)(nil)
+// Check at compile time whether MetricTimeSeriesDataIterator implements metrics.DataIterator interface.
+var _ metrics.DataIterator = (*MetricTimeSeriesDataIterator)(nil)
 
-type CounterTimeSeriesDataIterator struct {
+type MetricTimeSeriesDataIterator struct {
 	timeseries MetricTimeSeries
 
 	// dataIterator contains the DataIterator for the current run
@@ -62,7 +63,7 @@ type CounterTimeSeriesDataIterator struct {
 
 // Evaluate fulfills the metrics.DataIterator interface.
 // This function is responsible for returning the data points one at a time.
-func (di *CounterTimeSeriesDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
+func (di *MetricTimeSeriesDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
 	// Need the loop as when we reach the end of the iterator, regardless of what the end strategy is, we need to
 	// evaluate the logic again, after setting the iterator state.
 	for {
