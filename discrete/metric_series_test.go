@@ -11,21 +11,7 @@ import (
 	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
-func TestCounterTimeSeries(t *testing.T) {
-	t.Run("should return valid time series information", func(t *testing.T) {
-		dataGenerator := discrete.NewVoidDataGenerator(5)
-
-		timeSeries := discrete.NewCounterTimeSeries(
-			"some-series",
-			map[string]string{"key": "value"},
-			dataGenerator,
-			metrics.NewEndStrategyLoop())
-
-		assert.Equal(t, metrics.TimeSeriesTypeCounter, timeSeries.Info().Type)
-		assert.Equal(t, "some-series", timeSeries.Info().Name)
-		assert.Equal(t, map[string]string{"key": "value"}, timeSeries.Info().Labels)
-	})
-
+func TestMetricTimeSeries(t *testing.T) {
 	t.Run("should return a looped series given the loop end strategy", func(t *testing.T) {
 		dataGenerator, err := discrete.NewLinearSegmentDataGenerator(discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      50,
@@ -34,11 +20,11 @@ func TestCounterTimeSeries(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		timeSeries := discrete.NewCounterTimeSeries(
-			"some-series",
+		timeSeries := discrete.NewMetricTimeSeries(
 			map[string]string{"key": "value"},
 			dataGenerator,
-			metrics.NewEndStrategyLoop())
+			metrics.NewEndStrategyLoop(),
+		)
 
 		results := helperScraperCustom(
 			t,
@@ -68,8 +54,7 @@ func TestCounterTimeSeries(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		timeSeries := discrete.NewCounterTimeSeries(
-			"some-series",
+		timeSeries := discrete.NewMetricTimeSeries(
 			map[string]string{"key": "value"},
 			dataGenerator,
 			metrics.NewEndStrategySendLastValue())
@@ -102,8 +87,7 @@ func TestCounterTimeSeries(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		timeSeries := discrete.NewCounterTimeSeries(
-			"some-series",
+		timeSeries := discrete.NewMetricTimeSeries(
 			map[string]string{"key": "value"},
 			dataGenerator,
 			metrics.NewEndStrategySendCustomValue(metrics.ScrapeResult{Value: 123}))
@@ -136,8 +120,7 @@ func TestCounterTimeSeries(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		timeSeries := discrete.NewCounterTimeSeries(
-			"some-series",
+		timeSeries := discrete.NewMetricTimeSeries(
 			map[string]string{"key": "value"},
 			dataGenerator,
 			metrics.NewEndStrategyRemoveTimeSeries())

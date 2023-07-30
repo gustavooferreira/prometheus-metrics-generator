@@ -43,7 +43,7 @@ func helperScraperCustom(t *testing.T, startTime time.Time, scrapeInterval time.
 		return nil
 	}
 
-	err = scraper.Scrape(dataIterator, scrapeHandler)
+	err = scraper.ScrapeDataIterator(dataIterator, scrapeHandler)
 	require.NoError(t, err)
 
 	for _, r := range results {
