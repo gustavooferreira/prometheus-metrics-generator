@@ -4,49 +4,46 @@ import (
 	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
-// Check at compile time whether CounterTimeSeries implements metrics.TimeSeries interface.
-var _ metrics.TimeSeries = (*CounterTimeSeries)(nil)
+// Check at compile time whether MetricTimeSeries implements metrics.MetricTimeSeriesObservable interface.
+var _ metrics.MetricTimeSeriesObservable = (*MetricTimeSeries)(nil)
 
-// CounterTimeSeries represents a counter time series.
+// MetricTimeSeries represents a counter time series.
 // When the time series iterator gets to the end of the DataGenerator provided it will evaluate the metrics.EndStrategy
 // to decide on what to do next.
-// The zero value of CounterTimeSeries is not useful. Use NewCounterTimeSeries function.
-type CounterTimeSeries struct {
-	info metrics.TimeSeriesInfo
+// The zero value of MetricTimeSeries is not useful. Use NewMetricTimeSeries function.
+type MetricTimeSeries struct {
+	labels map[string]string
 
 	dataGenerator DataGenerator
 	endStrategy   metrics.EndStrategy
 }
 
-// NewCounterTimeSeries returns a new discrete counter time series.
-func NewCounterTimeSeries(seriesName string, labels map[string]string, data DataGenerator, endStrategy metrics.EndStrategy) CounterTimeSeries {
-	return CounterTimeSeries{
-		info: metrics.TimeSeriesInfo{
-			Type:   metrics.TimeSeriesTypeCounter,
-			Name:   seriesName,
-			Labels: labels,
-		},
+// NewMetricTimeSeries returns a new discrete counter time series.
+func NewMetricTimeSeries(labels map[string]string, data DataGenerator, endStrategy metrics.EndStrategy) MetricTimeSeries {
+	return MetricTimeSeries{
+		labels:        labels,
 		dataGenerator: data,
 		endStrategy:   endStrategy,
 	}
 }
 
-func (ts *CounterTimeSeries) Iterator() metrics.DataIterator {
+// Iterator returns a time series iterator that can be used to iterate over the data.
+func (ts *MetricTimeSeries) Iterator() metrics.DataIterator {
 	return &CounterTimeSeriesDataIterator{
 		timeseries: *ts,
 		state:      metrics.TimeSeriesIteratorStateRunning,
 	}
 }
 
-func (ts *CounterTimeSeries) Info() metrics.TimeSeriesInfo {
-	return ts.info
+func (ts *MetricTimeSeries) Labels() map[string]string {
+	return ts.labels
 }
 
 // Check at compile time whether CounterTimeSeriesDataIterator implements metrics.DataIterator interface.
 var _ metrics.DataIterator = (*CounterTimeSeriesDataIterator)(nil)
 
 type CounterTimeSeriesDataIterator struct {
-	timeseries CounterTimeSeries
+	timeseries MetricTimeSeries
 
 	// dataIterator contains the DataIterator for the current run
 	dataIterator metrics.DataIterator

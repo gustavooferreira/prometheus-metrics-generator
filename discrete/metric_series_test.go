@@ -15,13 +15,13 @@ func TestCounterTimeSeries(t *testing.T) {
 	t.Run("should return valid time series information", func(t *testing.T) {
 		dataGenerator := discrete.NewVoidDataGenerator(5)
 
-		timeSeries := discrete.NewCounterTimeSeries(
+		timeSeries := discrete.NewMetricTimeSeries(
 			"some-series",
 			map[string]string{"key": "value"},
 			dataGenerator,
 			metrics.NewEndStrategyLoop())
 
-		assert.Equal(t, metrics.TimeSeriesTypeCounter, timeSeries.Info().Type)
+		assert.Equal(t, metrics.MetricTypeCounter, timeSeries.Info().Type)
 		assert.Equal(t, "some-series", timeSeries.Info().Name)
 		assert.Equal(t, map[string]string{"key": "value"}, timeSeries.Info().Labels)
 	})
@@ -34,7 +34,7 @@ func TestCounterTimeSeries(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		timeSeries := discrete.NewCounterTimeSeries(
+		timeSeries := discrete.NewMetricTimeSeries(
 			"some-series",
 			map[string]string{"key": "value"},
 			dataGenerator,
@@ -68,7 +68,7 @@ func TestCounterTimeSeries(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		timeSeries := discrete.NewCounterTimeSeries(
+		timeSeries := discrete.NewMetricTimeSeries(
 			"some-series",
 			map[string]string{"key": "value"},
 			dataGenerator,
@@ -102,7 +102,7 @@ func TestCounterTimeSeries(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		timeSeries := discrete.NewCounterTimeSeries(
+		timeSeries := discrete.NewMetricTimeSeries(
 			"some-series",
 			map[string]string{"key": "value"},
 			dataGenerator,
@@ -136,7 +136,7 @@ func TestCounterTimeSeries(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		timeSeries := discrete.NewCounterTimeSeries(
+		timeSeries := discrete.NewMetricTimeSeries(
 			"some-series",
 			map[string]string{"key": "value"},
 			dataGenerator,
