@@ -1,0 +1,6 @@
+site_name: Prometheus Metrics Generator
+
+nav:
+  - Home: index.md
+  - Tutorials:
+    - Overview: tutorials/overview.md
