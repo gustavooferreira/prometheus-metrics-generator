@@ -35,7 +35,6 @@ func NewCollector(metrics []MetricObservable) *Collector {
 }
 
 // Describe is part of the implementation of the promentheus.Collector interface.
-// We don't return anything which means the collector is unchecked.
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	for _, metricObservable := range c.metricObservables {
 		for _, promDesc := range metricObservable.PromDescs() {

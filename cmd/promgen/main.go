@@ -14,7 +14,7 @@ import (
 // This is a CLI tool that reads the timeseries from a yaml file.
 // It can serve as a http server exposing the metrics or write to prometheus using remote write.
 func main() {
-	fmt.Println("Hello World!")
+	fmt.Println("Running prometheus metrics generator server")
 
 	dataGenerator, err := discrete.NewLinearSegmentDataGenerator(
 		discrete.LinearSegmentDataGeneratorOptions{
