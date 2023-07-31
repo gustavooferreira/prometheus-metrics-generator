@@ -1,0 +1,47 @@
+remoteWriter:   # only need to specify this block if we are going to use prometheus remote writer
+  host: prometheus:9090
+  scraper:
+    scrapeInterval: 15s
+    startTime: 2023-01-01T10:30:00Z   # the time the scraper starts at
+    scrapesCount: 100   # the number of scrapes the scrape should generate (zero means infinite)
+metrics:
+  - name: my_metric
+    help: my_metric help string
+    type: counter
+    labels:
+      - label1
+      - label2
+    timeseries:
+      - labels:
+          label1: value1A
+          label2: value2A
+        endStrategy: loop
+        data:   # Implicit Join
+          - LinearSegment:
+              iterationCount: 5
+              amplitudeStart: 0
+              amplitudeEnd: 10
+          - LinearSegment:
+              iterationCount: 5
+              amplitudeStart: 10
+              amplitudeEnd: 0
+      - labels:
+          label1: value1B
+          label2: value2B
+        endStrategy: loop
+        data:   # Implicit Join
+          - LinearSegment:
+              iterationCount: 5
+              amplitudeStart: 10
+              amplitudeEnd: 15
+          - Loop:
+              count: 2
+              data:
+                Void:
+                  count: 5
+          - LinearSegment:
+              iterationCount: 5
+              amplitudeStart: 15
+              amplitudeEnd: 10
+          - Void:
+              count: 5
