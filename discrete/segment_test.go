@@ -116,8 +116,8 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 
 		skipNTimes := 25
 		skipCount := 0
-		for iter := scraper.Iterator(); iter.HasNext(); {
-			scrapeInfo := iter.Next()
+		iter := scraper.Iterator()
+		for scrapeInfo, ok := iter.Next(); ok; scrapeInfo, ok = iter.Next() {
 
 			if skipCount < skipNTimes {
 				skipCount++
@@ -136,21 +136,21 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 
 		for _, r := range results {
 			t.Logf("[%3d] Timestamp: %s - Value: %.2f\n",
-				r.scrapeInfo.IterationCount,
+				r.scrapeInfo.IterationIndex,
 				r.scrapeInfo.IterationTime,
 				r.scrapeResult.Value,
 			)
 		}
 
 		require.Equal(t, 9, len(results))
-		assert.Equal(t, 25, results[0].scrapeInfo.IterationCount)
+		assert.Equal(t, 25, results[0].scrapeInfo.IterationIndex)
 		assert.Equal(t,
 			time.Date(2023, 1, 1, 10, 36, 15, 0, time.UTC),
 			results[0].scrapeInfo.IterationTime,
 		)
 		assert.InDelta(t, 20, results[0].scrapeResult.Value, 0.001)
 
-		assert.Equal(t, 33, results[8].scrapeInfo.IterationCount)
+		assert.Equal(t, 33, results[8].scrapeInfo.IterationIndex)
 		assert.Equal(t,
 			time.Date(2023, 1, 1, 10, 38, 15, 0, time.UTC),
 			results[8].scrapeInfo.IterationTime,

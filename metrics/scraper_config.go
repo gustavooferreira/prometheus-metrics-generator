@@ -7,7 +7,7 @@ import (
 
 // ScraperConfig represents the Scraper config.
 // The end time and iteration count limit represent stop conditions for the scraper.
-// If both contain the zero value, then the scraper will generate scrapes forever.
+// If neither are set, then the scraper will generate scrapes forever.
 // If both are set to a given value, then the scraper will stop when it hits the first stop condition.
 type ScraperConfig struct {
 	// StartTime defines the initial timestamp the scraper will use.
@@ -59,6 +59,7 @@ func (sc *ScraperConfig) applyFunctionalOptions(opts ...ScraperOption) {
 type ScraperOption func(sc *ScraperConfig)
 
 // WithScraperEndTime defines an end time for the Scraper.
+// The endTime provided is inclusive, meaning, the scraper will also generate a scrape for the endTime.
 func WithScraperEndTime(endTime time.Time) ScraperOption {
 	return func(sc *ScraperConfig) {
 		sc.endTime = endTime
@@ -66,6 +67,7 @@ func WithScraperEndTime(endTime time.Time) ScraperOption {
 }
 
 // WithScraperIterationCountLimit defines a max number of iterations for the scraper.
+// Negative numbers are not allowed.
 func WithScraperIterationCountLimit(n int) ScraperOption {
 	return func(sc *ScraperConfig) {
 		sc.iterationCountLimit = n

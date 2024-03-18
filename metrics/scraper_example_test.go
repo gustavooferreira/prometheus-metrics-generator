@@ -31,7 +31,7 @@ func ExampleScraper() {
 
 	scrapeHandler := func(scrapeInfo metrics.ScrapeInfo, scrapeResult metrics.ScrapeResult) error {
 		fmt.Printf("[%3d] Timestamp: %s - Value: %.2f\n",
-			scrapeInfo.IterationCount,
+			scrapeInfo.IterationIndex,
 			scrapeInfo.IterationTime,
 			scrapeResult.Value,
 		)

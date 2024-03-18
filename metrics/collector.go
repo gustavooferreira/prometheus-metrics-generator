@@ -60,7 +60,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	scrapeInfo := ScrapeInfo{
 		FirstIterationTime: c.firstIterationTime,
-		IterationCount:     c.iterationCount,
+		IterationIndex:     c.iterationCount,
 		IterationTime:      now,
 	}
 

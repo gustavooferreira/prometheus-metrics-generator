@@ -55,9 +55,8 @@ func (s *Scraper) Iterator() ScraperIterator {
 // This function terminates when the DataIterator has no more data left, or there are no more scrapes to be generated,
 // or the ScrapeHandler returns an error.
 func (s *Scraper) ScrapeDataIterator(dataIterator DataIterator, scrapeHandler ScrapeHandler) error {
-	for iter := s.Iterator(); iter.HasNext(); {
-		scrapeInfo := iter.Next()
-
+	iter := s.Iterator()
+	for scrapeInfo, ok := iter.Next(); ok; scrapeInfo, ok = iter.Next() {
 		scrapeResult := dataIterator.Evaluate(scrapeInfo)
 		if scrapeResult.Exhausted {
 			// exhausted time series
@@ -66,7 +65,7 @@ func (s *Scraper) ScrapeDataIterator(dataIterator DataIterator, scrapeHandler Sc
 
 		err := scrapeHandler(scrapeInfo, scrapeResult)
 		if err != nil {
-			return fmt.Errorf("failed while calling scrape handler: %s", err)
+			return fmt.Errorf("failed while calling scrape handler: %w", err)
 		}
 	}
 
@@ -85,8 +84,8 @@ type ScrapeHandler func(scrapeInfo ScrapeInfo, scrapeResult ScrapeResult) error
 type ScraperIterator struct {
 	// scraper is a copy of the scraper this iterator was created from.
 	scraper Scraper
-	// currentIteration keeps track of the current iteration.
-	currentIteration int
+	// currentIterationIndex keeps track of the current iteration.
+	currentIterationIndex int
 	// lastTimeStamp contains the timestamp of the last scrape. Used for calculations purposes.
 	lastTimeStamp time.Time
 }
@@ -94,14 +93,14 @@ type ScraperIterator struct {
 // HasNext reports whether there are more scrapes to be generated or whether the iterator has been exhausted.
 func (si *ScraperIterator) HasNext() bool {
 	// Check if we are past the iteration count limit
-	if si.scraper.cfg.iterationCountLimit > 0 && si.currentIteration >= si.scraper.cfg.iterationCountLimit {
+	if si.scraper.cfg.iterationCountLimit > 0 && si.currentIterationIndex >= si.scraper.cfg.iterationCountLimit {
 		return false
 	}
 
 	var nextScrapeTime time.Time
 
 	// compute next scrape time
-	if si.currentIteration == 0 {
+	if si.currentIterationIndex == 0 {
 		nextScrapeTime = si.scraper.cfg.StartTime
 	} else {
 		nextScrapeTime = si.lastTimeStamp.Add(si.scraper.cfg.ScrapeInterval)
@@ -116,30 +115,42 @@ func (si *ScraperIterator) HasNext() bool {
 }
 
 // Next returns the next generated scrape.
-func (si *ScraperIterator) Next() ScrapeInfo {
+// The return value 'ok' is true if Next() returns a valid result, otherwise, it returns false if the scrape iterator
+// has been exhausted.
+func (si *ScraperIterator) Next() (scrapeInfo ScrapeInfo, ok bool) {
+	// Check if we are past the iteration count limit
+	if si.scraper.cfg.iterationCountLimit > 0 && si.currentIterationIndex >= si.scraper.cfg.iterationCountLimit {
+		return scrapeInfo, false
+	}
+
 	var nextScrapeTime time.Time
 
 	// compute next scrape time
-	if si.currentIteration == 0 {
+	if si.currentIterationIndex == 0 {
 		nextScrapeTime = si.scraper.cfg.StartTime
 	} else {
 		nextScrapeTime = si.lastTimeStamp.Add(si.scraper.cfg.ScrapeInterval)
 	}
 
-	scrapeInfo := ScrapeInfo{
+	// Check if we are past the endTime
+	if !si.scraper.cfg.endTime.IsZero() && nextScrapeTime.After(si.scraper.cfg.endTime) {
+		return scrapeInfo, false
+	}
+
+	scrapeInfo = ScrapeInfo{
 		FirstIterationTime: si.scraper.cfg.StartTime,
-		IterationCount:     si.currentIteration,
+		IterationIndex:     si.currentIterationIndex,
 		IterationTime:      nextScrapeTime,
 	}
 
-	si.currentIteration++
+	si.currentIterationIndex++
 	si.lastTimeStamp = nextScrapeTime
 
-	return scrapeInfo
+	return scrapeInfo, true
 }
 
 // Reset resets the iterator, meaning the iterator will start from the beginning.
 // This function allows for the possibility of reusing an iterator after it's been used.
 func (si *ScraperIterator) Reset() {
-	si.currentIteration = 0
+	si.currentIterationIndex = 0
 }

@@ -32,12 +32,12 @@ func helperScraper(t *testing.T, dataIterator continuous.DataIterator, functionS
 		return nil
 	}
 
-	for iter := scraper.Iterator(); iter.HasNext(); {
-		scrapeInfo := iter.Next()
+	iter := scraper.Iterator()
+	for scrapeInfo, ok := iter.Next(); ok; scrapeInfo, ok = iter.Next() {
 
 		continuousScrapeInfo := continuous.ScrapeInfo{
 			FirstIterationTime: scrapeInfo.FirstIterationTime,
-			IterationCount:     scrapeInfo.IterationCount,
+			IterationCount:     scrapeInfo.IterationIndex,
 			IterationTime:      scrapeInfo.IterationTime,
 			FunctionStartTime:  functionStartTime,
 		}
@@ -54,7 +54,7 @@ func helperScraper(t *testing.T, dataIterator continuous.DataIterator, functionS
 
 	for _, r := range results {
 		t.Logf("[%3d] Timestamp: %s - Value: %6.2f - Missing: %t\n",
-			r.scrapeInfo.IterationCount,
+			r.scrapeInfo.IterationIndex,
 			r.scrapeInfo.IterationTime,
 			r.scrapeResult.Value,
 			r.scrapeResult.Missing,

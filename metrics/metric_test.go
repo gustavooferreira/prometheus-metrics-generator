@@ -113,8 +113,8 @@ func TestMetric(t *testing.T) {
 
 		// Evaluate
 		var results []resultContainer
-		for iter := scraper.Iterator(); iter.HasNext(); {
-			scrapeInfo := iter.Next()
+		iter := scraper.Iterator()
+		for scrapeInfo, ok := iter.Next(); ok; scrapeInfo, ok = iter.Next() {
 
 			metricResults := metric.Evaluate(scrapeInfo)
 			results = append(results, resultContainer{
@@ -126,14 +126,14 @@ func TestMetric(t *testing.T) {
 		for _, result := range results {
 			if len(result.metricResults) == 0 {
 				t.Logf("[%3d] Timestamp: %s - No time series\n",
-					result.scrapeInfo.IterationCount,
+					result.scrapeInfo.IterationIndex,
 					result.scrapeInfo.IterationTime,
 				)
 			}
 
 			for _, metricResult := range result.metricResults {
 				t.Logf("[%3d] Timestamp: %s - Value: %6.2f\n",
-					result.scrapeInfo.IterationCount,
+					result.scrapeInfo.IterationIndex,
 					result.scrapeInfo.IterationTime,
 					metricResult.Value,
 				)

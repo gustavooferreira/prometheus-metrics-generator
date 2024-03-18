@@ -38,9 +38,9 @@ type ScrapeInfo struct {
 	// FirstIterationTime represents the time at which the very first iteration (scrape) happened.
 	FirstIterationTime time.Time
 
-	// IterationCount specifies the count for this iteration.
-	// A count of zero means this is the first iteration.
-	IterationCount int
+	// IterationIndex specifies the index for this iteration.
+	// An index of zero means this is the first iteration.
+	IterationIndex int
 
 	// IterationTime specifies the time of this iteration.
 	IterationTime time.Time

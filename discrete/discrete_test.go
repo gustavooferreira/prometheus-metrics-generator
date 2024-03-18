@@ -48,7 +48,7 @@ func helperScraperCustom(t *testing.T, startTime time.Time, scrapeInterval time.
 
 	for _, r := range results {
 		t.Logf("[%3d] Timestamp: %s - Value: %6.2f - Missing: %t\n",
-			r.scrapeInfo.IterationCount,
+			r.scrapeInfo.IterationIndex,
 			r.scrapeInfo.IterationTime,
 			r.scrapeResult.Value,
 			r.scrapeResult.Missing,

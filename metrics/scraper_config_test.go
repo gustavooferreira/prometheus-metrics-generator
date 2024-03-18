@@ -39,6 +39,20 @@ func TestScraperConfig(t *testing.T) {
 		assert.Equal(t, expectedErrorMessage, err.Error())
 	})
 
+	t.Run("should not fail validation check when provided with an end time that is the same as the start time", func(t *testing.T) {
+		scraperConfig := metrics.ScraperConfig{
+			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
+			ScrapeInterval: 1 * time.Second,
+		}
+
+		scraperConfig.ApplyFunctionalOptions(
+			metrics.WithScraperEndTime(time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC)),
+		)
+
+		err := scraperConfig.Validate()
+		require.NoError(t, err)
+	})
+
 	t.Run("should fail validation check when provided with a negative iteration count limit", func(t *testing.T) {
 		scraperConfig := metrics.ScraperConfig{
 			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
@@ -79,9 +93,7 @@ func TestScraperConfig(t *testing.T) {
 		err := scraperConfig.Validate()
 		require.NoError(t, err)
 
-		assert.Equal(t,
-			time.Date(2023, 1, 1, 11, 0, 0, 0, time.UTC),
-			scraperConfig.GetEndTime())
+		assert.Equal(t, time.Date(2023, 1, 1, 11, 0, 0, 0, time.UTC), scraperConfig.GetEndTime())
 		assert.Equal(t, 10, scraperConfig.GetIterationCountLimit())
 	})
 }
