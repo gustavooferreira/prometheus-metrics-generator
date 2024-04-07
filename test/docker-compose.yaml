@@ -15,7 +15,13 @@ services:
       - type: bind
         source: ./prometheus
         target: /etc/prometheus
-  promlens:   # To connect to prometheus, type in the URL box: http://localhost:9090
+    command: # The first 4 entries were already present in the docker image CMD.
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-remote-write-receiver"
+  promlens: # To connect to prometheus, type in the URL box: http://localhost:9090
     image: "prom/promlens"
     ports:
       - "8080:8080"
