@@ -18,7 +18,7 @@ func TestLinearSegmentDataIterator(t *testing.T) {
 			AmplitudeEnd:   20,
 		})
 		require.Error(t, err)
-		expectedErrorMessage := "iteration count limit cannot be less than or equal to zero"
+		expectedErrorMessage := "error validating linear segment data generator configuration: iteration count limit cannot be less than or equal to zero"
 		assert.Equal(t, expectedErrorMessage, err.Error())
 	})
 

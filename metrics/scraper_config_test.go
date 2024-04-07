@@ -23,6 +23,18 @@ func TestScraperConfig(t *testing.T) {
 		assert.Equal(t, expectedErrorMessage, err.Error())
 	})
 
+	t.Run("should fail validation check when provided with a scrape interval of zero", func(t *testing.T) {
+		scraperConfig := metrics.ScraperConfig{
+			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
+			ScrapeInterval: 0 * time.Second,
+		}
+
+		err := scraperConfig.Validate()
+		require.Error(t, err)
+		expectedErrorMessage := "scrape interval cannot be less than or equal to zero"
+		assert.Equal(t, expectedErrorMessage, err.Error())
+	})
+
 	t.Run("should fail validation check when provided with an end time before start time", func(t *testing.T) {
 		scraperConfig := metrics.ScraperConfig{
 			StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),

@@ -2,10 +2,11 @@ package discrete
 
 import (
 	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
+	"github.com/gustavooferreira/prometheus-metrics-generator/promadapter"
 )
 
 // Check at compile time whether MetricTimeSeries implements metrics.MetricTimeSeriesObservable interface.
-var _ metrics.MetricTimeSeriesObservable = (*MetricTimeSeries)(nil)
+var _ promadapter.MetricTimeSeriesObservable = (*MetricTimeSeries)(nil)
 
 // MetricTimeSeries represents a metric time series (counter or gauge).
 // When the time series iterator gets to the end of the DataGenerator provided it will evaluate the metrics.EndStrategy

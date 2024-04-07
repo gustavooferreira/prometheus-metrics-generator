@@ -50,6 +50,7 @@ func (s *Scraper) Iterator() ScraperIterator {
 }
 
 // ScrapeDataIterator scrapes the DataIterator according to the settings of the Scraper.
+// The DataIterator is expected to return a Counter or a Gauge metric.
 // This function can be used as an alternative to creating an iterator and manually iterate over the scrapes.
 // For each generated scrape, this function will call the ScrapeHandler provided.
 // This function terminates when the DataIterator has no more data left, or there are no more scrapes to be generated,
@@ -73,12 +74,30 @@ func (s *Scraper) ScrapeDataIterator(dataIterator DataIterator, scrapeHandler Sc
 	return nil
 }
 
-// ScrapeHandler defines the function type to be used when calling the ScrapeDataIterator method of the Scraper.
-// Return an error to stop the scrapping from proceeding any further. The ScrapeDataIterator method will wrap the
-// returned error and return it.
-// The field 'Exhausted' in the struct ScrapeResult will never be set, since if the scraper has exhausted the
-// DataIterator it will automatically stop.
-type ScrapeHandler func(scrapeInfo ScrapeInfo, scrapeResult ScrapeResult) error
+// ScrapeDataHistogramIterator scrapes the DataHistogramIterator according to the settings of the Scraper.
+// The DataHistogramIterator is expected to return an Histogram.
+// This function can be used as an alternative to creating an iterator and manually iterate over the scrapes.
+// For each generated scrape, this function will call the ScrapeHistogramHandler provided.
+// This function terminates when the DataIterator has no more data left, or there are no more scrapes to be generated,
+// or the ScrapeHistogramHandler returns an error.
+func (s *Scraper) ScrapeDataHistogramIterator(dataHistogramIterator DataHistogramIterator, scrapeHistogramHandler ScrapeHistogramHandler) error {
+	iter := s.Iterator()
+	for scrapeInfo, ok := iter.Next(); ok; scrapeInfo, ok = iter.Next() {
+		scrapeResult := dataHistogramIterator.Evaluate(scrapeInfo)
+		if scrapeResult.Exhausted {
+			// exhausted time series
+			return nil
+		}
+
+		err := scrapeHistogramHandler(scrapeInfo, scrapeResult)
+		if err != nil {
+			return fmt.Errorf("failed while calling scrape handler: %w", err)
+		}
+	}
+
+	// exhausted scraper
+	return nil
+}
 
 // ScraperIterator iterates over the scraper.
 type ScraperIterator struct {
@@ -117,6 +136,13 @@ func (si *ScraperIterator) HasNext() bool {
 // Next returns the next generated scrape.
 // The return value 'ok' is true if Next() returns a valid result, otherwise, it returns false if the scrape iterator
 // has been exhausted.
+//
+// Example:
+//
+//	iter := scraper.Iterator()
+//	for scrapeInfo, ok := iter.Next(); ok; scrapeInfo, ok = iter.Next() {
+//		// do stuff with the scrapeInfo
+//	}
 func (si *ScraperIterator) Next() (scrapeInfo ScrapeInfo, ok bool) {
 	// Check if we are past the iteration count limit
 	if si.scraper.cfg.iterationCountLimit > 0 && si.currentIterationIndex >= si.scraper.cfg.iterationCountLimit {
@@ -153,4 +179,5 @@ func (si *ScraperIterator) Next() (scrapeInfo ScrapeInfo, ok bool) {
 // This function allows for the possibility of reusing an iterator after it's been used.
 func (si *ScraperIterator) Reset() {
 	si.currentIterationIndex = 0
+	si.lastTimeStamp = time.Time{}
 }

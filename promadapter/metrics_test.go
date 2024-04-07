@@ -1,4 +1,4 @@
-package metrics_test
+package promadapter_test
 
 import (
 	"testing"
@@ -9,14 +9,15 @@ import (
 
 	"github.com/gustavooferreira/prometheus-metrics-generator/discrete"
 	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
+	"github.com/gustavooferreira/prometheus-metrics-generator/promadapter"
 )
 
 func TestMetric(t *testing.T) {
 	t.Run("should return valid metric descriptor", func(t *testing.T) {
-		metric := metrics.NewMetric(
+		metric := promadapter.NewMetric(
 			"some-metric",
 			"some-help-description",
-			metrics.MetricTypeGauge,
+			promadapter.MetricTypeGauge,
 			[]string{"label1", "label2"},
 		)
 
@@ -24,7 +25,7 @@ func TestMetric(t *testing.T) {
 
 		assert.Equal(t, "some-metric", desc.FQName)
 		assert.Equal(t, "some-help-description", desc.Help)
-		assert.Equal(t, metrics.MetricTypeGauge, desc.MetricType)
+		assert.Equal(t, promadapter.MetricTypeGauge, desc.MetricType)
 		assert.Equal(t, []string{"label1", "label2"}, desc.LabelsNames)
 	})
 
@@ -37,10 +38,10 @@ func TestMetric(t *testing.T) {
 			metrics.NewEndStrategyRemoveTimeSeries(),
 		)
 
-		metric := metrics.NewMetric(
+		metric := promadapter.NewMetric(
 			"some-metric",
 			"some-help-description",
-			metrics.MetricTypeCounter,
+			promadapter.MetricTypeCounter,
 			[]string{"label1", "label2"},
 		)
 
@@ -59,10 +60,10 @@ func TestMetric(t *testing.T) {
 			metrics.NewEndStrategyRemoveTimeSeries(),
 		)
 
-		metric := metrics.NewMetric(
+		metric := promadapter.NewMetric(
 			"some-metric",
 			"some-help-description",
-			metrics.MetricTypeCounter,
+			promadapter.MetricTypeCounter,
 			[]string{"label1", "label2"},
 		)
 
@@ -97,10 +98,10 @@ func TestMetric(t *testing.T) {
 			metrics.NewEndStrategyRemoveTimeSeries(),
 		)
 
-		metric := metrics.NewMetric(
+		metric := promadapter.NewMetric(
 			"some-metric",
 			"some-help-description",
-			metrics.MetricTypeCounter,
+			promadapter.MetricTypeCounter,
 			[]string{"label1"},
 		)
 
@@ -153,5 +154,5 @@ func TestMetric(t *testing.T) {
 
 type resultContainer struct {
 	scrapeInfo    metrics.ScrapeInfo
-	metricResults []metrics.MetricResult
+	metricResults []promadapter.MetricResult
 }

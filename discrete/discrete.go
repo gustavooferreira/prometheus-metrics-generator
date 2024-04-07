@@ -7,6 +7,8 @@ import (
 	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
+// DataGenerator generates data according to the generator.
+// It's meant to be used by Counters and Gauges.
 type DataGenerator interface {
 	Iterator() metrics.DataIterator
 	Describe() DataSpec

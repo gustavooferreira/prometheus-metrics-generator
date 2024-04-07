@@ -33,7 +33,9 @@ func (sc *ScraperConfig) validate() error {
 		return fmt.Errorf("scrape interval cannot be less than or equal to zero")
 	}
 
-	// if end time is set, make sure it comes after start time.
+	// If end time is set, make sure the end time is not before start time.
+	// Note that because the end time is inclusive, if the end time is the same as the start time, then the scraper
+	// should return one scrape.
 	if !sc.endTime.IsZero() {
 		if sc.endTime.Before(sc.StartTime) {
 			return fmt.Errorf("end time cannot be before start time")
@@ -60,6 +62,7 @@ type ScraperOption func(sc *ScraperConfig)
 
 // WithScraperEndTime defines an end time for the Scraper.
 // The endTime provided is inclusive, meaning, the scraper will also generate a scrape for the endTime.
+// By default, endTime is not set.
 func WithScraperEndTime(endTime time.Time) ScraperOption {
 	return func(sc *ScraperConfig) {
 		sc.endTime = endTime
@@ -68,6 +71,7 @@ func WithScraperEndTime(endTime time.Time) ScraperOption {
 
 // WithScraperIterationCountLimit defines a max number of iterations for the scraper.
 // Negative numbers are not allowed.
+// By default, there is no iteraction count limit.
 func WithScraperIterationCountLimit(n int) ScraperOption {
 	return func(sc *ScraperConfig) {
 		sc.iterationCountLimit = n

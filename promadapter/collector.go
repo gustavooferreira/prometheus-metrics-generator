@@ -1,10 +1,12 @@
-package metrics
+package promadapter
 
 import (
 	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
 // Check at compile time whether Collector implements prometheus.Collector interface.
@@ -58,7 +60,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 		c.firstIterationTime = now
 	}
 
-	scrapeInfo := ScrapeInfo{
+	scrapeInfo := metrics.ScrapeInfo{
 		FirstIterationTime: c.firstIterationTime,
 		IterationIndex:     c.iterationCount,
 		IterationTime:      now,
