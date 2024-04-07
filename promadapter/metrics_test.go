@@ -30,7 +30,7 @@ func TestMetric(t *testing.T) {
 	})
 
 	t.Run("should fail to attach a time series which includes an unexpected label name", func(t *testing.T) {
-		dataGenerator := discrete.NewVoidDataGenerator(5)
+		dataGenerator := discrete.NewVoidSegmentDataGenerator(5)
 
 		timeSeries := discrete.NewMetricTimeSeries(
 			map[string]string{"label_extra": "value"},
@@ -52,7 +52,7 @@ func TestMetric(t *testing.T) {
 	})
 
 	t.Run("should fail to attach a time series which does not include an expected label name", func(t *testing.T) {
-		dataGenerator := discrete.NewVoidDataGenerator(5)
+		dataGenerator := discrete.NewVoidSegmentDataGenerator(5)
 
 		timeSeries := discrete.NewMetricTimeSeries(
 			map[string]string{"label1": "value1"},
@@ -82,7 +82,7 @@ func TestMetric(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		dataGenerator1 := discrete.NewCustomValuesDataGenerator([]discrete.CustomValue{{Value: 10}})
+		dataGenerator1 := discrete.NewCustomValuesDataGenerator([]discrete.CustomValueSample{{Value: 10}})
 
 		timeSeries1 := discrete.NewMetricTimeSeries(
 			map[string]string{"label1": "valueA"},
@@ -90,7 +90,7 @@ func TestMetric(t *testing.T) {
 			metrics.NewEndStrategyRemoveTimeSeries(),
 		)
 
-		dataGenerator2 := discrete.NewCustomValuesDataGenerator([]discrete.CustomValue{{Value: 1}, {Value: 2}})
+		dataGenerator2 := discrete.NewCustomValuesDataGenerator([]discrete.CustomValueSample{{Value: 1}, {Value: 2}})
 
 		timeSeries2 := discrete.NewMetricTimeSeries(
 			map[string]string{"label1": "valueB"},

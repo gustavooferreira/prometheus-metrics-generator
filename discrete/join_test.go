@@ -10,7 +10,15 @@ import (
 )
 
 func TestJoinDataIterator(t *testing.T) {
-	t.Run("should not return any sample when no data iterators are provided", func(t *testing.T) {
+	t.Run("should not return any sample when a nil slice of generators is provided", func(t *testing.T) {
+		dataGenerator := discrete.NewJoinDataGenerator(nil)
+
+		results := helperScraper(t, dataGenerator.Iterator())
+
+		require.Equal(t, 0, len(results))
+	})
+
+	t.Run("should not return any sample when no data generator are provided", func(t *testing.T) {
 		dataGenerator := discrete.NewJoinDataGenerator([]discrete.DataGenerator{})
 
 		results := helperScraper(t, dataGenerator.Iterator())
@@ -122,8 +130,7 @@ func TestJoinDataIterator(t *testing.T) {
 		join2 := []discrete.DataGenerator{lsDataGenerator3, lsDataGenerator4}
 		dataGeneratorJoin2 := discrete.NewJoinDataGenerator(join2)
 
-		// ------------
-
+		// join other joins
 		greaterJoin := []discrete.DataGenerator{dataGeneratorJoin1, dataGeneratorJoin2}
 		dataGenerator := discrete.NewJoinDataGenerator(greaterJoin)
 

@@ -31,10 +31,8 @@ var _ DataGenerator = (*LinearSegmentDataGenerator)(nil)
 
 // LinearSegmentDataGenerator returns a DataGenerator representing a linear segment.
 // A linear segment can be horizontal or have a positive or negative slope.
-// Linear segments can be put together, with the help of the JoinDataGenerator to form more complex structures.
-// Note that it's an error to use a linear segment containing negative values with counters. It's the user's
-// responsibility to make sure negative numbers only appear in gauges.
-// The LinearSegmentDataGenerator can only be used for metrics representing Counters or Gauges.
+// Note that it's an error to use negative values with counters. It's the user responsibility to make sure negative
+// numbers only appear in gauges.
 // The zero value is not useful.
 type LinearSegmentDataGenerator struct {
 	options LinearSegmentDataGeneratorOptions
@@ -58,13 +56,13 @@ func NewLinearSegmentDataGenerator(options LinearSegmentDataGeneratorOptions) (*
 	}, nil
 }
 
-func (ls *LinearSegmentDataGenerator) Iterator() metrics.DataIterator {
+func (dg *LinearSegmentDataGenerator) Iterator() metrics.DataIterator {
 	return &LinearSegmentDataIterator{
-		linearSegmentDataGenerator: *ls,
+		linearSegmentDataGenerator: *dg,
 	}
 }
 
-func (ls *LinearSegmentDataGenerator) Describe() DataSpec {
+func (dg *LinearSegmentDataGenerator) Describe() DataSpec {
 	return DataNodeDataSpec{
 		name: "Linear Segment",
 	}
@@ -83,20 +81,20 @@ type LinearSegmentDataIterator struct {
 
 // Evaluate fulfills the metrics.DataIterator interface.
 // This function is responsible for returning the data points one at a time.
-func (lsi *LinearSegmentDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
+func (di *LinearSegmentDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
 	// Have we reached the end?
-	if lsi.iterIndex >= lsi.linearSegmentDataGenerator.options.IterationCountLimit {
+	if di.iterIndex >= di.linearSegmentDataGenerator.options.IterationCountLimit {
 		return metrics.ScrapeResult{Exhausted: true}
 	}
 
 	// Make sure to increment the iterator index before leaving the function
-	defer func() { lsi.iterIndex++ }()
+	defer func() { di.iterIndex++ }()
 
 	// If we have a horizontal line, there is no need to do any computation
-	if lsi.linearSegmentDataGenerator.options.AmplitudeStart == lsi.linearSegmentDataGenerator.options.AmplitudeEnd {
-		return metrics.ScrapeResult{Value: lsi.linearSegmentDataGenerator.options.AmplitudeStart}
+	if di.linearSegmentDataGenerator.options.AmplitudeStart == di.linearSegmentDataGenerator.options.AmplitudeEnd {
+		return metrics.ScrapeResult{Value: di.linearSegmentDataGenerator.options.AmplitudeStart}
 	}
 
-	value := lsi.linearSegmentDataGenerator.options.AmplitudeStart + lsi.linearSegmentDataGenerator.slope*float64(lsi.iterIndex)
+	value := di.linearSegmentDataGenerator.options.AmplitudeStart + di.linearSegmentDataGenerator.slope*float64(di.iterIndex)
 	return metrics.ScrapeResult{Value: value}
 }

@@ -6,7 +6,4 @@
 // If the user specifies that it wants a linear segment to go from the value 10 to 30 in 3 iterations, if the second
 // scrape fails for whatever reason, then the time series will become: [10, missing, 20, 30], instead of the expected
 // [10, 20, 30]. This means it would take a whole scrape interval to reach to the same point.
-//
-// This package defines shapes and containers (join, loops).
-// It should also have its version of a time series.
 package discrete

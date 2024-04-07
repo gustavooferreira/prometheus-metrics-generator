@@ -25,9 +25,9 @@ func ExampleDataSpec() {
 		panic(err)
 	}
 
-	lsDataGenerator2a := discrete.NewLoopDataGenerator(lsDataGenerator2, 3)
+	lsDataGenerator2Loop := discrete.NewLoopDataGenerator(lsDataGenerator2, 3)
 
-	dataGenerator := discrete.NewJoinDataGenerator([]discrete.DataGenerator{lsDataGenerator1, lsDataGenerator2a})
+	dataGenerator := discrete.NewJoinDataGenerator([]discrete.DataGenerator{lsDataGenerator1, lsDataGenerator2Loop})
 
 	rootDataSpec := dataGenerator.Describe()
 	result := discrete.Describe(rootDataSpec)

@@ -11,17 +11,17 @@ import (
 
 func TestRandomDataIterator(t *testing.T) {
 	t.Run("should fail given that iteration count limit is set to zero", func(t *testing.T) {
-		_, err := discrete.NewRandomDataGenerator(discrete.RandomDataGeneratorOptions{
+		_, err := discrete.NewRandomDataGenerator(discrete.RandomSegmentDataGeneratorOptions{
 			AmplitudeMin: 11,
 			AmplitudeMax: 20,
 		})
 		require.Error(t, err)
-		expectedErrorMessage := "iteration count limit cannot be less than or equal to zero"
+		expectedErrorMessage := "error validating random segment data generator configuration: iteration count limit cannot be less than or equal to zero"
 		assert.Equal(t, expectedErrorMessage, err.Error())
 	})
 
 	t.Run("should produce valid results for the given count", func(t *testing.T) {
-		dataGenerator, err := discrete.NewRandomDataGenerator(discrete.RandomDataGeneratorOptions{
+		dataGenerator, err := discrete.NewRandomDataGenerator(discrete.RandomSegmentDataGeneratorOptions{
 			AmplitudeMin:        11,
 			AmplitudeMax:        20,
 			IterationCountLimit: 10,
