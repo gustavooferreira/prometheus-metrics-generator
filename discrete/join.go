@@ -7,27 +7,29 @@ import (
 // Check at compile time whether JoinDataGenerator implements DataGenerator interface.
 var _ DataGenerator = (*JoinDataGenerator)(nil)
 
+// JoinDataGenerator joins several segments together to form a bigger and more complex segments.
+// It joins all DataGenerators one after the next.
 type JoinDataGenerator struct {
 	dataGenerators []DataGenerator
 }
 
-// NewJoinDataGenerator joins all DataGenerators, one after the next.
+// NewJoinDataGenerator creates a new instance of JoinDataGenerator.
 func NewJoinDataGenerator(dataGenerators []DataGenerator) *JoinDataGenerator {
 	return &JoinDataGenerator{
 		dataGenerators: dataGenerators,
 	}
 }
 
-func (jdg *JoinDataGenerator) Iterator() metrics.DataIterator {
+func (dg *JoinDataGenerator) Iterator() metrics.DataIterator {
 	return &JoinDataIterator{
-		joinDataGenerator: *jdg,
+		joinDataGenerator: *dg,
 	}
 }
 
-func (jdg *JoinDataGenerator) Describe() DataSpec {
+func (dg *JoinDataGenerator) Describe() DataSpec {
 	var dataSpecs []DataSpec
 
-	for _, dataGenerator := range jdg.dataGenerators {
+	for _, dataGenerator := range dg.dataGenerators {
 		dataSpecs = append(dataSpecs, dataGenerator.Describe())
 	}
 
@@ -49,15 +51,15 @@ type JoinDataIterator struct {
 
 // Evaluate fulfills the metrics.DataIterator interface.
 // This function is responsible for returning the data points one at a time.
-func (jdi *JoinDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
-	for ; jdi.dataGeneratorIndex < len(jdi.joinDataGenerator.dataGenerators); jdi.dataGeneratorIndex++ {
-		if jdi.dataIterator == nil {
-			jdi.dataIterator = jdi.joinDataGenerator.dataGenerators[jdi.dataGeneratorIndex].Iterator()
+func (di *JoinDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) metrics.ScrapeResult {
+	for ; di.dataGeneratorIndex < len(di.joinDataGenerator.dataGenerators); di.dataGeneratorIndex++ {
+		if di.dataIterator == nil {
+			di.dataIterator = di.joinDataGenerator.dataGenerators[di.dataGeneratorIndex].Iterator()
 		}
 
-		result := jdi.dataIterator.Evaluate(scrapeInfo)
+		result := di.dataIterator.Evaluate(scrapeInfo)
 		if result.Exhausted {
-			jdi.dataIterator = nil
+			di.dataIterator = nil
 			continue
 		}
 
@@ -75,10 +77,10 @@ type JoinDataSpec struct {
 	Children []DataSpec
 }
 
-func (jds JoinDataSpec) DataGeneratorNodeType() DataGeneratorNodeType {
+func (ds JoinDataSpec) DataGeneratorNodeType() DataGeneratorNodeType {
 	return DataGeneratorNodeTypeJoin
 }
 
-func (jds JoinDataSpec) Name() string {
+func (ds JoinDataSpec) Name() string {
 	return "Join"
 }

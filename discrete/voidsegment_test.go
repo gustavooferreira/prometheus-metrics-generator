@@ -11,19 +11,27 @@ import (
 
 func TestVoidDataIterator(t *testing.T) {
 	t.Run("should not return any sample when count is zero", func(t *testing.T) {
-		dataGenerator := discrete.NewVoidDataGenerator(0)
+		dataGenerator := discrete.NewVoidSegmentDataGenerator(0)
 		results := helperScraper(t, dataGenerator.Iterator())
 		require.Equal(t, 0, len(results))
 	})
 
 	t.Run("should not return any sample when count is negative", func(t *testing.T) {
-		dataGenerator := discrete.NewVoidDataGenerator(-5)
+		dataGenerator := discrete.NewVoidSegmentDataGenerator(-5)
 		results := helperScraper(t, dataGenerator.Iterator())
 		require.Equal(t, 0, len(results))
 	})
 
+	t.Run("should return a single sample when the count is 1", func(t *testing.T) {
+		dataGenerator := discrete.NewVoidSegmentDataGenerator(1)
+		results := helperScraper(t, dataGenerator.Iterator())
+
+		require.Equal(t, 1, len(results))
+		assert.True(t, results[0].scrapeResult.Missing)
+	})
+
 	t.Run("should produce valid results for the given count", func(t *testing.T) {
-		dataGenerator := discrete.NewVoidDataGenerator(5)
+		dataGenerator := discrete.NewVoidSegmentDataGenerator(5)
 		results := helperScraper(t, dataGenerator.Iterator())
 
 		require.Equal(t, 5, len(results))

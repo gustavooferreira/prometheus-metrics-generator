@@ -7,12 +7,14 @@ import (
 // Check at compile time whether LoopDataGenerator implements DataGenerator interface.
 var _ DataGenerator = (*LoopDataGenerator)(nil)
 
+// LoopDataGenerator loops over the DataGenerator N times.
 type LoopDataGenerator struct {
 	dataGenerator DataGenerator
 	count         int
 }
 
-// NewLoopDataGenerator loops over the DataGenerator N times.
+// NewLoopDataGenerator creates a new instance of LoopDataGenerator.
+// A negative count will produce no samples.
 func NewLoopDataGenerator(dataGenerator DataGenerator, count int) *LoopDataGenerator {
 	return &LoopDataGenerator{
 		dataGenerator: dataGenerator,
@@ -20,16 +22,16 @@ func NewLoopDataGenerator(dataGenerator DataGenerator, count int) *LoopDataGener
 	}
 }
 
-func (ldg *LoopDataGenerator) Iterator() metrics.DataIterator {
+func (dg *LoopDataGenerator) Iterator() metrics.DataIterator {
 	return &LoopDataIterator{
-		loopDataGenerator: *ldg,
+		loopDataGenerator: *dg,
 	}
 }
 
-func (ldg *LoopDataGenerator) Describe() DataSpec {
+func (dg *LoopDataGenerator) Describe() DataSpec {
 	return LoopDataSpec{
-		Count: ldg.count,
-		Func:  ldg.dataGenerator.Describe(),
+		Count: dg.count,
+		Func:  dg.dataGenerator.Describe(),
 	}
 }
 
@@ -73,10 +75,10 @@ type LoopDataSpec struct {
 	Func  DataSpec
 }
 
-func (lds LoopDataSpec) DataGeneratorNodeType() DataGeneratorNodeType {
+func (ds LoopDataSpec) DataGeneratorNodeType() DataGeneratorNodeType {
 	return DataGeneratorNodeTypeLoop
 }
 
-func (lds LoopDataSpec) Name() string {
+func (ds LoopDataSpec) Name() string {
 	return "Loop"
 }

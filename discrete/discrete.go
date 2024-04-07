@@ -8,7 +8,7 @@ import (
 )
 
 // DataGenerator generates data according to the generator.
-// It's meant to be used by Counters and Gauges.
+// It's meant to be used by Counter and Gauge metrics.
 type DataGenerator interface {
 	Iterator() metrics.DataIterator
 	Describe() DataSpec

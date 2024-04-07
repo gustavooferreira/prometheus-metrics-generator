@@ -63,6 +63,8 @@ type Metric struct {
 	timeSeriesDesc []*prometheus.Desc
 }
 
+// NewMetric creates a new instance of Metric.
+// It's only meant to be used by metrics that are Counters or Gauges.
 func NewMetric(fqName string, help string, metricType MetricType, labelsNames []string) *Metric {
 	return &Metric{
 		desc: Desc{
