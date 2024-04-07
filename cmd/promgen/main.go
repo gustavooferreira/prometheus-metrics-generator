@@ -35,12 +35,10 @@ func main() {
 	)
 
 	metric := promadapter.NewMetric("my_metric", "my metric help", promadapter.MetricTypeGauge, []string{"label1"})
-	err = metric.Attach(timeSeries)
+	err = metric.AddTimeSeries(timeSeries)
 	if err != nil {
 		panic(err)
 	}
-
-	metric.Prepare()
 
 	collector := promadapter.NewCollector([]promadapter.MetricObservable{metric})
 

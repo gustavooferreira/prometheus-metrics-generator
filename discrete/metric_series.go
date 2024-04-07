@@ -19,7 +19,7 @@ type MetricTimeSeries struct {
 	endStrategy   metrics.EndStrategy
 }
 
-// NewMetricTimeSeries returns a new discrete counter time series.
+// NewMetricTimeSeries creates a new instance of MetricTimeSeries.
 func NewMetricTimeSeries(labels map[string]string, data DataGenerator, endStrategy metrics.EndStrategy) *MetricTimeSeries {
 	return &MetricTimeSeries{
 		labels:        labels,
@@ -47,8 +47,8 @@ var _ metrics.DataIterator = (*MetricTimeSeriesDataIterator)(nil)
 type MetricTimeSeriesDataIterator struct {
 	timeseries MetricTimeSeries
 
-	// dataIterator contains the DataIterator for the current run
-	dataIterator metrics.DataIterator
+	// currentDataIterator contains the DataIterator for the current run (in case we use a loop over strategy)
+	currentDataIterator metrics.DataIterator
 
 	// Reports whether we are evaluating data or we are in the end strategy stage
 	state metrics.TimeSeriesIteratorState
@@ -71,7 +71,7 @@ func (di *MetricTimeSeriesDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) 
 		if di.state == metrics.TimeSeriesIteratorStateEndStrategy {
 			switch di.timeseries.endStrategy.EndStrategyType {
 			case metrics.EndStrategyTypeLoop:
-				di.dataIterator = nil
+				di.currentDataIterator = nil
 				di.loopCount++
 				di.state = metrics.TimeSeriesIteratorStateRunning
 				continue // it would be safe to let the logic run through as well
@@ -88,11 +88,11 @@ func (di *MetricTimeSeriesDataIterator) Evaluate(scrapeInfo metrics.ScrapeInfo) 
 		}
 
 		// if we don't have an iterator, get one
-		if di.dataIterator == nil {
-			di.dataIterator = di.timeseries.dataGenerator.Iterator()
+		if di.currentDataIterator == nil {
+			di.currentDataIterator = di.timeseries.dataGenerator.Iterator()
 		}
 
-		result := di.dataIterator.Evaluate(scrapeInfo)
+		result := di.currentDataIterator.Evaluate(scrapeInfo)
 
 		// We reached the end of the iterator
 		if result.Exhausted {
