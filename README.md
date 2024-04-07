@@ -111,3 +111,5 @@ The following is a list of the supported discrete data iterators:
 
 * Add other discrete segments, like the ability to Add, Subtract, multiply and Divide 2 different segments.
 * Create trignometric related segments (ex: sin, cos, tan, etc).
+* Add support for Histogram!
+* Add same functionality to continuous segments as the one we have in the discrete segments.
