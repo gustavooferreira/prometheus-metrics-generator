@@ -26,15 +26,11 @@ type Collector struct {
 	// firstIterationTime represents the time at which the very first iteration (scrape) happened.
 	firstIterationTime time.Time
 
-	// iterationCount specifies the count for this iteration.
-	// A count of zero means this is the first iteration.
-	iterationCount int
+	// iterIndex keeps track of the current iteration.
+	iterIndex int
 }
 
 // NewCollector returns a new collector to be registered with the prometheus.Registerer.
-// The metrics passed to the collector need to have been prepared already, meaning the Prepare() method on the Metric
-// struct must be called before the metrics can be passed to the Collector.
-// Failing to do so will result in no metrics being returned by the collector.
 func NewCollector(metrics []MetricObservable) *Collector {
 	return &Collector{
 		metricObservables: metrics,
@@ -44,8 +40,8 @@ func NewCollector(metrics []MetricObservable) *Collector {
 // Describe is part of the implementation of the promentheus.Collector interface.
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	for _, metricObservable := range c.metricObservables {
-		for _, promDesc := range metricObservable.PromDescs() {
-			ch <- promDesc
+		for i := 0; i < metricObservable.TimeSeriesCount(); i++ {
+			ch <- metricObservable.PromDesc()
 		}
 	}
 }
@@ -56,24 +52,25 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	c.mu.Lock()
 	// is this the first iteration?
-	if c.iterationCount == 0 {
+	if c.iterIndex == 0 {
 		c.firstIterationTime = now
 	}
 
 	scrapeInfo := metrics.ScrapeInfo{
 		FirstIterationTime: c.firstIterationTime,
-		IterationIndex:     c.iterationCount,
+		IterationIndex:     c.iterIndex,
 		IterationTime:      now,
 	}
 
-	// increment iteration count here as we won't use it anymore in this function
-	c.iterationCount++
+	// Make sure to increment the iterator index before leaving the function
+	defer func() { c.iterIndex++ }()
+
 	c.mu.Unlock()
 
 	for _, metricObservable := range c.metricObservables {
-		metricsResults := metricObservable.Evaluate(scrapeInfo)
+		metricResults := metricObservable.Evaluate(scrapeInfo)
 
-		for _, metricResult := range metricsResults {
+		for _, metricResult := range metricResults {
 			var metricType prometheus.ValueType
 			switch metricResult.Desc.MetricType {
 			case MetricTypeCounter:

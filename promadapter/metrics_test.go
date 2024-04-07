@@ -45,7 +45,7 @@ func TestMetric(t *testing.T) {
 			[]string{"label1", "label2"},
 		)
 
-		err := metric.Attach(timeSeries)
+		err := metric.AddTimeSeries(timeSeries)
 		require.Error(t, err)
 		assert.Equal(t, "label mismatch: unexpected label in time series", err.Error())
 
@@ -67,12 +67,12 @@ func TestMetric(t *testing.T) {
 			[]string{"label1", "label2"},
 		)
 
-		err := metric.Attach(timeSeries)
+		err := metric.AddTimeSeries(timeSeries)
 		require.Error(t, err)
 		assert.Equal(t, "label mismatch: missing expected label in time series", err.Error())
 	})
 
-	t.Run("should never return any results given that the samples are market as being missed", func(t *testing.T) {
+	t.Run("should never return any results given that the samples are marked as being missed", func(t *testing.T) {
 		scraper, err := metrics.NewScraper(
 			metrics.ScraperConfig{
 				StartTime:      time.Date(2023, 1, 1, 10, 30, 0, 0, time.UTC),
@@ -105,12 +105,10 @@ func TestMetric(t *testing.T) {
 			[]string{"label1"},
 		)
 
-		err = metric.Attach(timeSeries1)
+		err = metric.AddTimeSeries(timeSeries1)
 		require.NoError(t, err)
-		err = metric.Attach(timeSeries2)
+		err = metric.AddTimeSeries(timeSeries2)
 		require.NoError(t, err)
-
-		metric.Prepare()
 
 		// Evaluate
 		var results []resultContainer

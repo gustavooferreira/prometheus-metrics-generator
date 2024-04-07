@@ -9,13 +9,16 @@ import (
 )
 
 // MetricObservable defines the interface metrics should implement.
+// This only applies to Counter and Gauge metrics.
 type MetricObservable interface {
 	Desc() Desc
-	PromDescs() []*prometheus.Desc
+	PromDesc() *prometheus.Desc
 	Evaluate(scrapeInfo metrics.ScrapeInfo) []MetricResult
+	TimeSeriesCount() int
 }
 
 // MetricTimeSeriesObservable is the interface implemented by any time series wanting to be scraped.
+// This is only valid for Counter and Gauge metrics.
 type MetricTimeSeriesObservable interface {
 	Iterator() metrics.DataIterator
 	Labels() map[string]string
@@ -49,35 +52,43 @@ var _ MetricObservable = (*Metric)(nil)
 
 // Metric represents a metric.
 // It's only meant to be used by metrics that are Counters or Gauges.
+// The zero value is not useful. Use the NewMetric function instead.
 type Metric struct {
-	// desc represents the descriptor that describes this metric
+	// desc represents the descriptor that describes this metric.
 	desc Desc
 
-	// timeSeries contains all the time series attached to this metric
+	// promDesc contains the prometheus.Desc for the metric.
+	promDesc *prometheus.Desc
+
+	// timeSeries contains all the time series attached to this metric.
 	timeSeries []MetricTimeSeriesObservable
 
-	// timeSeriesIterators contains the iterators for all time series
+	// timeSeriesIterators contains the iterators for all time series.
 	timeSeriesIterators []metrics.DataIterator
 
-	// timeSeriesDesc contains the prometheus.Desc for all time series
-	timeSeriesDesc []*prometheus.Desc
+	// timeSeriesCount is the number of time series contained in this metric.
+	timeSeriesCount int
 }
 
 // NewMetric creates a new instance of Metric.
 // It's only meant to be used by metrics that are Counters or Gauges.
 func NewMetric(fqName string, help string, metricType MetricType, labelsNames []string) *Metric {
+	desc := Desc{
+		FQName:      fqName,
+		Help:        help,
+		MetricType:  metricType,
+		LabelsNames: labelsNames,
+	}
+	promDesc := prometheus.NewDesc(fqName, help, labelsNames, nil)
+
 	return &Metric{
-		desc: Desc{
-			FQName:      fqName,
-			Help:        help,
-			MetricType:  metricType,
-			LabelsNames: labelsNames,
-		},
+		desc:     desc,
+		promDesc: promDesc,
 	}
 }
 
-// Attach attaches a time series (counter or gauge) to the metric.
-func (m *Metric) Attach(metricTimeSeries MetricTimeSeriesObservable) error {
+// AddTimeSeries adds a time series (counter or gauge) to the metric.
+func (m *Metric) AddTimeSeries(metricTimeSeries MetricTimeSeriesObservable) error {
 	// validate labels match
 	labelsNamesMap := make(map[string]struct{})
 	for _, labelName := range m.desc.LabelsNames {
@@ -100,32 +111,22 @@ func (m *Metric) Attach(metricTimeSeries MetricTimeSeriesObservable) error {
 	}
 
 	m.timeSeries = append(m.timeSeries, metricTimeSeries)
+	m.timeSeriesIterators = append(m.timeSeriesIterators, metricTimeSeries.Iterator())
+	m.timeSeriesCount++
+
 	return nil
-}
-
-// Prepare gets the iterators and descriptors for all time series.
-// This function needs to be called before being passed to a collector.
-func (m *Metric) Prepare() {
-	for _, timeSeries := range m.timeSeries {
-		m.timeSeriesIterators = append(m.timeSeriesIterators, timeSeries.Iterator())
-
-		desc := prometheus.NewDesc(
-			m.desc.FQName,
-			m.desc.Help,
-			m.desc.LabelsNames,
-			nil,
-		)
-
-		m.timeSeriesDesc = append(m.timeSeriesDesc, desc)
-	}
 }
 
 func (m *Metric) Desc() Desc {
 	return m.desc
 }
 
-func (m *Metric) PromDescs() []*prometheus.Desc {
-	return m.timeSeriesDesc
+func (m *Metric) PromDesc() *prometheus.Desc {
+	return m.promDesc
+}
+
+func (m *Metric) TimeSeriesCount() int {
+	return m.timeSeriesCount
 }
 
 // Evaluate returns the computed samples as well as the labels for the time series.
@@ -147,7 +148,7 @@ func (m *Metric) Evaluate(scrapeInfo metrics.ScrapeInfo) []MetricResult {
 
 		result := MetricResult{
 			Desc:         m.desc,
-			PromDesc:     m.timeSeriesDesc[i],
+			PromDesc:     m.promDesc,
 			LabelsValues: m.timeSeries[i].Labels(),
 			Value:        scrapeResult.Value,
 		}
