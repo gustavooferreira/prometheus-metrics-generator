@@ -41,6 +41,12 @@ func (ts *MetricTimeSeries) Labels() map[string]string {
 	return ts.labels
 }
 
+// IsInfinite reports whether this time series is infinite.
+// In other words, whether this time series will never stop generating samples.
+func (ts *MetricTimeSeries) IsInfinite() bool {
+	return ts.endStrategy.EndStrategyType != metrics.EndStrategyTypeRemoveTimeSeries
+}
+
 // Check at compile time whether MetricTimeSeriesDataIterator implements metrics.DataIterator interface.
 var _ metrics.DataIterator = (*MetricTimeSeriesDataIterator)(nil)
 

@@ -60,6 +60,7 @@ Docs:
 * <https://prometheus.io/docs/practices/remote_write/>
 * <https://prometheus.io/docs/prometheus/latest/feature_flags/#remote-write-receiver>
 * <https://prometheus.io/docs/prometheus/latest/storage/#remote-storage-integrations>
+* <https://prometheus.io/docs/prometheus/latest/querying/api/#remote-write-receiver>
 
 Golang libraries:
 
@@ -71,10 +72,13 @@ Instead of having these dependencies, let's write the code ourselves!
 
 ## Nomenclature
 
-* `Sample` - A measure containing a pair of (timestamp, value).
+* `Sample` - A measure containing a pair of (timestamp in milliseconds, value as a float64).
 * `Label` - A pair of (key, value).
 * `Series` or `TimeSeries` - A list of samples, identified by a unique set of labels (including the `__name__` label).
+* `Metric Family` or `Metric Name` - The metric name (without any labels). A metric family can be, and usually is, made
+up of several timeseries.
 * `Scrape` - A snapshot of samples at a given point in time for a particular system being observed.
+* `Metric Type` - The type of the metric (e.g.: counter, gauge, histogram, summary).
 
 ## Components
 

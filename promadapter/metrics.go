@@ -2,6 +2,7 @@ package promadapter
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -22,11 +23,12 @@ type MetricObservable interface {
 type MetricTimeSeriesObservable interface {
 	Iterator() metrics.DataIterator
 	Labels() map[string]string
+	IsInfinite() bool
 }
 
 // Desc represents the description of the metric.
 type Desc struct {
-	// FQName represents the name of the metric.
+	// FQName represents the name of the metric (also known as Metric Family).
 	FQName string
 
 	// Help represent the Help string of the metric.
@@ -65,6 +67,9 @@ type Metric struct {
 
 	// timeSeriesIterators contains the iterators for all time series.
 	timeSeriesIterators []metrics.DataIterator
+
+	// timeSeriesStaleMarkers contains the state for stale markers for all time series.
+	timeSeriesStaleMarkers []bool
 
 	// timeSeriesCount is the number of time series contained in this metric.
 	timeSeriesCount int
@@ -112,6 +117,7 @@ func (m *Metric) AddTimeSeries(metricTimeSeries MetricTimeSeriesObservable) erro
 
 	m.timeSeries = append(m.timeSeries, metricTimeSeries)
 	m.timeSeriesIterators = append(m.timeSeriesIterators, metricTimeSeries.Iterator())
+	m.timeSeriesStaleMarkers = append(m.timeSeriesStaleMarkers, false)
 	m.timeSeriesCount++
 
 	return nil
@@ -129,6 +135,17 @@ func (m *Metric) TimeSeriesCount() int {
 	return m.timeSeriesCount
 }
 
+// HasInfiniteTimeSeries checks whether any of the time series in this metric family is infinite.
+func (m *Metric) HasInfiniteTimeSeries() bool {
+	for _, singleTimeseries := range m.timeSeries {
+		if singleTimeseries.IsInfinite() {
+			return true
+		}
+	}
+
+	return false
+}
+
 // Evaluate returns the computed samples as well as the labels for the time series.
 // It returns an array as the Metric may have multiple time series attached.
 // If the sample for a given time series is missing or the time series itself has been exhausted, then the result
@@ -140,17 +157,28 @@ func (m *Metric) Evaluate(scrapeInfo metrics.ScrapeInfo) []MetricResult {
 	for i, timeSeriesIterator := range m.timeSeriesIterators {
 		scrapeResult := timeSeriesIterator.Evaluate(scrapeInfo)
 
-		// We do not send a given time series result if the sample has been flagged as missing or the time series has
-		// exhausted.
-		if scrapeResult.Exhausted || scrapeResult.Missing {
+		// We do not send a given time series result if the sample has been flagged as missing.
+		if scrapeResult.Missing {
 			continue
 		}
 
+		// We do not send a given time series result if the time series has exhausted and the stale marker has already
+		// been sent.
+		if scrapeResult.Exhausted {
+			if m.timeSeriesStaleMarkers[i] {
+				continue
+			}
+
+			m.timeSeriesStaleMarkers[i] = true
+		}
+
 		result := MetricResult{
-			Desc:         m.desc,
-			PromDesc:     m.promDesc,
-			LabelsValues: m.timeSeries[i].Labels(),
-			Value:        scrapeResult.Value,
+			Desc:        m.desc,
+			PromDesc:    m.promDesc,
+			LabelsSet:   m.timeSeries[i].Labels(),
+			Timestamp:   scrapeInfo.IterationTime,
+			Value:       scrapeResult.Value,
+			StaleMarker: m.timeSeriesStaleMarkers[i],
 		}
 
 		results = append(results, result)
@@ -165,8 +193,18 @@ type MetricResult struct {
 	Desc     Desc
 	PromDesc *prometheus.Desc
 
-	LabelsValues map[string]string
+	// LabelsSet is the set of labels associated with this sample.
+	LabelsSet map[string]string
 
-	// Value represents the value of the sample
+	// Timestamp represents the timestamp of the sample.
+	Timestamp time.Time
+
+	// Value represents the value of the sample.
 	Value float64
+
+	// StaleMarker represents whether this time series has come to an end.
+	// Spec Ref:
+	//	Prometheus remote write compatible senders MUST send stale markers when a time series will no longer be appended
+	//  to.
+	StaleMarker bool
 }

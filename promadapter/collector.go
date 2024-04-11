@@ -86,7 +86,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 			var labelValues []string
 
 			for _, labelName := range metricObservable.Desc().LabelsNames {
-				labelValues = append(labelValues, metricResult.LabelsValues[labelName])
+				labelValues = append(labelValues, metricResult.LabelsSet[labelName])
 			}
 
 			metric, err := prometheus.NewConstMetric(
