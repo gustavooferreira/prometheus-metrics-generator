@@ -24,6 +24,8 @@ type Scraper interface {
 // prometheusRemoteWriter should be replaced for an interface with a single method: Send()
 // Ideally, this function would flush, so we can check if the remoteWriter passed in implements the flush interface
 // and if it does, we call flush on it!
+// TODO: This function needs to keep track of the time series being generated and in the end send stale markers
+// for the time series that didn't mark themselves as stale already!
 func GenerateAndImportMetrics(ctx context.Context, prometheusRemoteWriter *PrometheusRemoteWriter, scraper Scraper, metricsObservables []promadapter.MetricObservable) error {
 	atLeastOneTimeSeriesIsInfinite := false
 
