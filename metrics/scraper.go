@@ -18,14 +18,14 @@ type Scraper struct {
 }
 
 // NewScraper returns a new instance of Scraper.
-func NewScraper(cfg ScraperConfig, opts ...ScraperOption) (Scraper, error) {
+func NewScraper(cfg ScraperConfig, opts ...ScraperOption) (*Scraper, error) {
 	cfg.applyFunctionalOptions(opts...)
 
 	if err := cfg.validate(); err != nil {
-		return Scraper{}, fmt.Errorf("error validating scraper configuration: %w", err)
+		return nil, fmt.Errorf("error validating scraper configuration: %w", err)
 	}
 
-	scraper := Scraper{
+	scraper := &Scraper{
 		cfg: cfg,
 	}
 

@@ -24,6 +24,20 @@ func RemoteWrite() {
 
 	fmt.Println("Running prometheus remote write")
 
+	// create scraper
+	scraper, err := metrics.NewScraper(
+		metrics.ScraperConfig{
+			StartTime:      time.Date(2024, 4, 11, 0, 0, 0, 0, time.UTC),
+			ScrapeInterval: 15 * time.Second,
+		},
+		metrics.WithScraperIterationCountLimit(100),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	// create the data generators and add them to a time series.
+
 	dataGenerator, err := discrete.NewLinearSegmentDataGenerator(
 		discrete.LinearSegmentDataGeneratorOptions{
 			AmplitudeStart:      50,
@@ -38,11 +52,11 @@ func RemoteWrite() {
 	timeSeries := discrete.NewMetricTimeSeries(
 		map[string]string{"label1": "value1"},
 		dataGenerator,
-		metrics.NewEndStrategyRemoveTimeSeries(),
-		// metrics.NewEndStrategyLoop(),
+		// metrics.NewEndStrategyRemoveTimeSeries(),
+		metrics.NewEndStrategyLoop(),
 	)
 
-	metricName := "this_is_a_metric"
+	metricName := "this_is_a_metric_2"
 
 	metric := promadapter.NewMetric(metricName, "my metric help", promadapter.MetricTypeGauge, []string{"label1"})
 
@@ -60,51 +74,10 @@ func RemoteWrite() {
 		panic(err)
 	}
 
-	// create scraper
-	scraper, err := metrics.NewScraper(
-		metrics.ScraperConfig{
-			StartTime:      time.Date(2024, 4, 11, 0, 0, 0, 0, time.UTC),
-			ScrapeInterval: 15 * time.Second,
-		},
-		metrics.WithScraperIterationCountLimit(100),
-	)
+	err = promwrite.GenerateAndImportMetrics(ctx, prometheusRemoteWriter, scraper, []promadapter.MetricObservable{metric})
 	if err != nil {
 		panic(err)
 	}
-
-	// this check here doesn't make sense, but we will be moving all this logic to a function!
-	if scraper.IsInfinite() {
-		panic("can't have infinite scrapers with remote write")
-	}
-
-	if metric.HasInfiniteTimeSeries() {
-		panic("can't have infinite time series with remote write")
-	}
-
-	iter := scraper.Iterator()
-	for scrapeInfo, ok := iter.Next(); ok; scrapeInfo, ok = iter.Next() {
-		metricResults := metric.Evaluate(scrapeInfo)
-
-		// We have no more metrics to send
-		if len(metricResults) == 0 {
-			break
-		}
-
-		remoteWriterTimeSeries := promwrite.ConvertToRemoteWriterTimeSeries(metricName, metricResults)
-
-		fmt.Printf("Time series: %+v\n", remoteWriterTimeSeries)
-
-		err := prometheusRemoteWriter.Send(ctx, remoteWriterTimeSeries)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	// TODO: Send Stale markers for metrics that didn't have them sent already!
-	// For this we need to keep track of all the time series we've sent (the key should be all the labels serialized,
-	// make sure the labels are sorted first)
-	// Then we should remove them from the set as we see them being marked as stale.
-	// Finally send the stale markers for the left overs.
 }
 
 func ExposeServer() {

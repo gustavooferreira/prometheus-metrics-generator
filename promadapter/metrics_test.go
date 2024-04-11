@@ -23,7 +23,7 @@ func TestMetric(t *testing.T) {
 
 		desc := metric.Desc()
 
-		assert.Equal(t, "some-metric", desc.FQName)
+		assert.Equal(t, "some-metric", desc.MetricFamily)
 		assert.Equal(t, "some-help-description", desc.Help)
 		assert.Equal(t, promadapter.MetricTypeGauge, desc.MetricType)
 		assert.Equal(t, []string{"label1", "label2"}, desc.LabelsNames)

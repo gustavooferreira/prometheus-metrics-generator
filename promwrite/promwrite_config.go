@@ -17,12 +17,20 @@ type PrometheusRemoteWriterConfig struct {
 
 	// httpClient is the HTTP client used to send the samples to the Remote Write Server.
 	httpClient *http.Client
+
+	// headers represents the headers to be sent with every single request.
+	// Extra headers can be sent when calling the Send() method.
+	headers map[string][]string
 }
 
 // validate validates the config struct.
 func (c *PrometheusRemoteWriterConfig) validate() error {
 	if c.Endpoint == "" {
 		return fmt.Errorf("prometheus endpoint cannot be nil")
+	}
+
+	if err := validateHTTPHeaders(c.headers); err != nil {
+		return fmt.Errorf("failed validating headers: %w", err)
 	}
 
 	return nil
@@ -50,5 +58,12 @@ type PrometheusRemoteWriterConfigOption func(c *PrometheusRemoteWriterConfig)
 func WithHTTPClient(httpClient *http.Client) PrometheusRemoteWriterConfigOption {
 	return func(c *PrometheusRemoteWriterConfig) {
 		c.httpClient = httpClient
+	}
+}
+
+// WithHeaders sets the headers to be sent in all Prometheus Remote Write requests.
+func WithHeaders(httpHeaders http.Header) PrometheusRemoteWriterConfigOption {
+	return func(c *PrometheusRemoteWriterConfig) {
+		c.headers = httpHeaders
 	}
 }

@@ -157,25 +157,8 @@ func (wo *writeOptions) applyFunctionalOptions(opts ...WriteOption) {
 
 // validate validates the writeOptions struct.
 func (wo *writeOptions) validate() error {
-	if _, ok := wo.headers["X-Prometheus-Remote-Write-Version"]; ok {
-		return fmt.Errorf("failed validating write options: setting header %q not allowed", "X-Prometheus-Remote-Write-Version")
-	}
-
-	if _, ok := wo.headers["Content-Type"]; ok {
-		return fmt.Errorf("failed validating write options: setting header %q not allowed", "Content-Type")
-	}
-
-	if _, ok := wo.headers["Content-Encoding"]; ok {
-		return fmt.Errorf("failed validating write options: setting header %q not allowed", "Content-Encoding")
-	}
-
-	// if the User-Agent header is set, it cannot be empty
-	if userAgentHeaderValues, ok := wo.headers["User-Agent"]; ok {
-		for _, headerValue := range userAgentHeaderValues {
-			if headerValue == "" {
-				return fmt.Errorf("failed validating write options: user agent header value cannot be empty")
-			}
-		}
+	if err := validateHTTPHeaders(wo.headers); err != nil {
+		return fmt.Errorf("failed validating headers: %w", err)
 	}
 
 	return nil
@@ -194,6 +177,31 @@ func WithWriteHeader(key string, value string) WriteOption {
 
 		o.headers[key] = []string{value}
 	}
+}
+
+func validateHTTPHeaders(headers map[string][]string) error {
+	if _, ok := headers["X-Prometheus-Remote-Write-Version"]; ok {
+		return fmt.Errorf("setting header %q not allowed", "X-Prometheus-Remote-Write-Version")
+	}
+
+	if _, ok := headers["Content-Type"]; ok {
+		return fmt.Errorf("setting header %q not allowed", "Content-Type")
+	}
+
+	if _, ok := headers["Content-Encoding"]; ok {
+		return fmt.Errorf("setting header %q not allowed", "Content-Encoding")
+	}
+
+	// if the User-Agent header is set, it cannot be empty
+	if userAgentHeaderValues, ok := headers["User-Agent"]; ok {
+		for _, headerValue := range userAgentHeaderValues {
+			if headerValue == "" {
+				return fmt.Errorf("user agent header value cannot be empty")
+			}
+		}
+	}
+
+	return nil
 }
 
 // toProtoTimeSeries converts our []TimeSeries structs into protobuf structs, ready to be sent down the wire.
@@ -286,22 +294,3 @@ func convertLabels(labels []Label) ([]prompb.Label, error) {
 
 	return protoLabels, nil
 }
-
-// ----------
-
-// For the chunks sender we should take this into account:
-// Prometheus Remote Write compatible senders MUST send samples for any given series in timestamp order.
-// Prometheus Remote Write compatible Senders MAY send multiple requests for different series in parallel.
-
-// Basically specify a maximum of samples per send.
-// And have "shards" where we can send multiple timeseries per shard since it's fine to send them in parallel.
-
-// Sharding the current sharding scheme in Prometheus for remote write parallelisation is very much an implementation detail, and isn’t part of the spec. When senders do implement parallelisation they MUST preserve per-series sample ordering.
-// How can we parallelise requests with the in-order constraint? Samples must be in-order for a given series. Remote write requests can be sent in parallel as long as they are for different series. In Prometheus, we shard the samples by their labels into separate queues, and then writes happen sequentially in each queue. This guarantees samples for the same series are delivered in order, but samples for different series are sent in parallel - and potentially "out of order" between different series.
-
-// Prometheus Remote Write compatible senders MUST retry write requests on HTTP 5xx responses and MUST use a backoff
-// algorithm to prevent overwhelming the server.
-// They MUST NOT retry write requests on HTTP 2xx and 4xx responses other than 429.
-// They MAY retry on HTTP 429 responses, which could result in senders "falling behind" if the server cannot keep up.
-// This is done to ensure data is not lost when there are server side errors, and progress is made when there are
-// client side errors.

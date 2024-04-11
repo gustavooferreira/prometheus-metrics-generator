@@ -16,6 +16,7 @@ type MetricObservable interface {
 	PromDesc() *prometheus.Desc
 	Evaluate(scrapeInfo metrics.ScrapeInfo) []MetricResult
 	TimeSeriesCount() int
+	HasInfiniteTimeSeries() bool
 }
 
 // MetricTimeSeriesObservable is the interface implemented by any time series wanting to be scraped.
@@ -28,8 +29,8 @@ type MetricTimeSeriesObservable interface {
 
 // Desc represents the description of the metric.
 type Desc struct {
-	// FQName represents the name of the metric (also known as Metric Family).
-	FQName string
+	// MetricFamily represents the name of the metric (also known as Metric Family).
+	MetricFamily string
 
 	// Help represent the Help string of the metric.
 	Help string
@@ -77,14 +78,14 @@ type Metric struct {
 
 // NewMetric creates a new instance of Metric.
 // It's only meant to be used by metrics that are Counters or Gauges.
-func NewMetric(fqName string, help string, metricType MetricType, labelsNames []string) *Metric {
+func NewMetric(metricFamily string, help string, metricType MetricType, labelsNames []string) *Metric {
 	desc := Desc{
-		FQName:      fqName,
-		Help:        help,
-		MetricType:  metricType,
-		LabelsNames: labelsNames,
+		MetricFamily: metricFamily,
+		Help:         help,
+		MetricType:   metricType,
+		LabelsNames:  labelsNames,
 	}
-	promDesc := prometheus.NewDesc(fqName, help, labelsNames, nil)
+	promDesc := prometheus.NewDesc(metricFamily, help, labelsNames, nil)
 
 	return &Metric{
 		desc:     desc,
