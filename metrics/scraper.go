@@ -49,6 +49,11 @@ func (s *Scraper) Iterator() ScraperIterator {
 	}
 }
 
+// ScrapeInterval reports the scrape interval for the scraper.
+func (s *Scraper) ScrapeInterval() time.Duration {
+	return s.cfg.ScrapeInterval
+}
+
 // ScrapeDataIterator scrapes the DataIterator according to the settings of the Scraper.
 // The DataIterator is expected to return a Counter or a Gauge metric.
 // This function can be used as an alternative to creating an iterator and manually iterate over the scrapes.

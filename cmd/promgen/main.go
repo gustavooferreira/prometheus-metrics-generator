@@ -56,7 +56,7 @@ func RemoteWrite() {
 		metrics.NewEndStrategyLoop(),
 	)
 
-	metricName := "this_is_a_metric_2"
+	metricName := "this_is_a_metric_3"
 
 	metric := promadapter.NewMetric(metricName, "my metric help", promadapter.MetricTypeGauge, []string{"label1"})
 

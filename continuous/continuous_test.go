@@ -37,7 +37,7 @@ func helperScraper(t *testing.T, dataIterator continuous.DataIterator, functionS
 
 		continuousScrapeInfo := continuous.ScrapeInfo{
 			FirstIterationTime: scrapeInfo.FirstIterationTime,
-			IterationCount:     scrapeInfo.IterationIndex,
+			IterationIndex:     scrapeInfo.IterationIndex,
 			IterationTime:      scrapeInfo.IterationTime,
 			FunctionStartTime:  functionStartTime,
 		}

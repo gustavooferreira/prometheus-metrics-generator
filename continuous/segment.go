@@ -7,6 +7,26 @@ import (
 	"github.com/gustavooferreira/prometheus-metrics-generator/metrics"
 )
 
+// LinearSegmentDataIteratorOptions contains the options for the LinearSegmentDataIterator.
+type LinearSegmentDataIteratorOptions struct {
+	// AmplitudeStart represents the initial value for the segment.
+	AmplitudeStart float64
+
+	// AmplitudeEnd represents the end value for the segment.
+	AmplitudeEnd float64
+
+	// DurationLength sets the max duration between the first and the last value.
+	DurationLength time.Duration
+
+	// IntervalLeftBoundOpen specifies whether the left bound of the duration interval should be open.
+	// If a scrape time lands on the left bound and this option is set to true, the function will return a missing value.
+	IntervalLeftBoundOpen bool
+
+	// IntervalRightBoundOpen specifies whether the right bound of the duration interval should be open.
+	// If a scrape time lands on the right bound and this option is set to true, the function will return a missing value.
+	IntervalRightBoundOpen bool
+}
+
 // Check at compile time whether LinearSegmentDataIterator implements DataIterator interface.
 var _ DataIterator = (*LinearSegmentDataIterator)(nil)
 
@@ -66,24 +86,4 @@ func (ls *LinearSegmentDataIterator) Evaluate(scrapeInfo ScrapeInfo) metrics.Scr
 // Duration reports the duration of the continuous function.
 func (ls *LinearSegmentDataIterator) Duration() time.Duration {
 	return ls.options.DurationLength
-}
-
-// LinearSegmentDataIteratorOptions contains the options for the LinearSegmentDataIterator.
-type LinearSegmentDataIteratorOptions struct {
-	// AmplitudeStart represents the initial value for the segment.
-	AmplitudeStart float64
-
-	// AmplitudeEnd represents the end value for the segment.
-	AmplitudeEnd float64
-
-	// DurationLength sets the max duration between the first and the last value.
-	DurationLength time.Duration
-
-	// IntervalLeftBoundOpen specifies whether the left bound of the duration interval should be open.
-	// If a scrape time lands on the left bound and this option is set to true, the function will return a missing value.
-	IntervalLeftBoundOpen bool
-
-	// IntervalRightBoundOpen specifies whether the right bound of the duration interval should be open.
-	// If a scrape time lands on the right bound and this option is set to true, the function will return a missing value.
-	IntervalRightBoundOpen bool
 }
